@@ -234,6 +234,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\FlowModel.cs" />
+    <Compile Include="Models\SolutionModel.cs" />
+    <Compile Include="Services\FlowService.cs" />
+    <Compile Include="Services\SolutionService.cs" />
     <Compile Include="ToolCore\SolutionConnectionReferenceReassignment.cs" />
     <Compile Include="Forms\SolutionConnectionReferenceReassignmentControl.cs">
       <SubType>UserControl</SubType>
@@ -250,9 +254,6 @@
     <None Include="tmp\notes.md" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="Services\" />
-    <Folder Include="tmp\res\" />
     <Folder Include="Utilities\" />
   </ItemGroup>
   <ItemGroup>

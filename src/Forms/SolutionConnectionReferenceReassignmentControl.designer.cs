@@ -1,6 +1,8 @@
-﻿namespace SolutionConnectionReferenceReassignment
+﻿using XrmToolBox.Extensibility;
+
+namespace SolutionConnectionReferenceReassignment
 {
-    partial class SolutionConnectionReferenceReassignmentControl
+    partial class SolutionConnectionReferenceReassignmentControl : PluginControlBase
     {
         /// <summary> 
         /// Variable nécessaire au concepteur.
@@ -34,11 +36,11 @@
             this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbSample = new System.Windows.Forms.ToolStripButton();
             this.label1 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.btn_LoadSolution = new System.Windows.Forms.Button();
+            this.cmb_SolutionList = new System.Windows.Forms.ComboBox();
+            this.dgv_Flows = new System.Windows.Forms.DataGridView();
             this.toolStripMenu.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_Flows)).BeginInit();
             this.SuspendLayout();
             // 
             // toolStripMenu
@@ -51,7 +53,7 @@
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
             this.toolStripMenu.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStripMenu.Size = new System.Drawing.Size(746, 27);
+            this.toolStripMenu.Size = new System.Drawing.Size(927, 27);
             this.toolStripMenu.TabIndex = 4;
             this.toolStripMenu.Text = "toolStrip1";
             // 
@@ -86,49 +88,53 @@
             this.label1.Text = "This Tool is Designed to Bulk Update Connection References at the Action Level wi" +
     "thin Power Automate Flows to Reduce Some Overhead of Ownership Reassignmetn";
             // 
-            // button1
+            // btn_LoadSolution
             // 
-            this.button1.Location = new System.Drawing.Point(16, 74);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(102, 23);
-            this.button1.TabIndex = 6;
-            this.button1.Text = "Load Solution";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btn_LoadSolution.Location = new System.Drawing.Point(16, 74);
+            this.btn_LoadSolution.Name = "btn_LoadSolution";
+            this.btn_LoadSolution.Size = new System.Drawing.Size(204, 23);
+            this.btn_LoadSolution.TabIndex = 6;
+            this.btn_LoadSolution.Text = "Load Environment Solution List";
+            this.btn_LoadSolution.UseVisualStyleBackColor = true;
+            this.btn_LoadSolution.Click += new System.EventHandler(this.btn_LoadSolution_Click);
             // 
-            // dataGridView1
+            // cmb_SolutionList
             // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(16, 103);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowHeadersWidth = 51;
-            this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(704, 92);
-            this.dataGridView1.TabIndex = 7;
+            this.cmb_SolutionList.FormattingEnabled = true;
+            this.cmb_SolutionList.Location = new System.Drawing.Point(226, 74);
+            this.cmb_SolutionList.Name = "cmb_SolutionList";
+            this.cmb_SolutionList.Size = new System.Drawing.Size(497, 24);
+            this.cmb_SolutionList.TabIndex = 7;
+            this.cmb_SolutionList.SelectedIndexChanged += new System.EventHandler(this.cmb_SolutionList_SelectedIndexChanged);
             // 
-            // textBox1
+            // dgv_Flows
             // 
-            this.textBox1.Location = new System.Drawing.Point(124, 75);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(596, 22);
-            this.textBox1.TabIndex = 8;
+            this.dgv_Flows.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv_Flows.Location = new System.Drawing.Point(16, 114);
+            this.dgv_Flows.Name = "dgv_Flows";
+            this.dgv_Flows.RowHeadersWidth = 51;
+            this.dgv_Flows.RowTemplate.Height = 24;
+            this.dgv_Flows.Size = new System.Drawing.Size(893, 150);
+            this.dgv_Flows.TabIndex = 8;
+            this.dgv_Flows.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Flows_CellContentClick);
             // 
             // SolutionConnectionReferenceReassignmentControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.dataGridView1);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.dgv_Flows);
+            this.Controls.Add(this.cmb_SolutionList);
+            this.Controls.Add(this.btn_LoadSolution);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.toolStripMenu);
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "SolutionConnectionReferenceReassignmentControl";
             this.PluginIcon = ((System.Drawing.Icon)(resources.GetObject("$this.PluginIcon")));
-            this.Size = new System.Drawing.Size(746, 370);
+            this.Size = new System.Drawing.Size(927, 370);
             this.Load += new System.EventHandler(this.MyPluginControl_Load);
             this.toolStripMenu.ResumeLayout(false);
             this.toolStripMenu.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_Flows)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -140,8 +146,8 @@
         private System.Windows.Forms.ToolStripButton tsbSample;
         private System.Windows.Forms.ToolStripSeparator tssSeparator1;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Button btn_LoadSolution;
+        private System.Windows.Forms.ComboBox cmb_SolutionList;
+        private System.Windows.Forms.DataGridView dgv_Flows;
     }
 }
