@@ -46,8 +46,8 @@ namespace SolutionConnectionReferenceReassignment.Services
 
                 flows.Add(new FlowModel
                 {
-                    FlowId = flow.Id,
                     Name = flow.GetAttributeValue<string>("name"),
+                    FlowId = flow.Id,
                     StateCode = flow.GetAttributeValue<OptionSetValue>("statecode")?.Value ?? -1,
                     StatusCode = flow.GetAttributeValue<OptionSetValue>("statuscode")?.Value ?? -1
                 });

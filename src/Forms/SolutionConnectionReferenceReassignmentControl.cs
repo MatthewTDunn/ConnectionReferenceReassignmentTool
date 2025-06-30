@@ -1,16 +1,9 @@
 ﻿using McTools.Xrm.Connection;
 using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Query;
 using SolutionConnectionReferenceReassignment.Models;
 using SolutionConnectionReferenceReassignment.Services;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 
@@ -23,7 +16,6 @@ namespace SolutionConnectionReferenceReassignment
         public SolutionConnectionReferenceReassignmentControl()
         {
             InitializeComponent();
-            cmb_SolutionList.SelectedIndexChanged += cmb_SolutionList_SelectedIndexChanged;
         }
 
         private void MyPluginControl_Load(object sender, EventArgs e)
@@ -48,39 +40,7 @@ namespace SolutionConnectionReferenceReassignment
             CloseTool();
         }
 
-        private void tsbSample_Click(object sender, EventArgs e)
-        {
-            // The ExecuteMethod method handles connecting to an
-            // organization if XrmToolBox is not yet connected
-            ExecuteMethod(GetAccounts);
-        }
 
-        private void GetAccounts()
-        {
-            WorkAsync(new WorkAsyncInfo
-            {
-                Message = "Getting accounts",
-                Work = (worker, args) =>
-                {
-                    args.Result = Service.RetrieveMultiple(new QueryExpression("account")
-                    {
-                        TopCount = 50
-                    });
-                },
-                PostWorkCallBack = (args) =>
-                {
-                    if (args.Error != null)
-                    {
-                        MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    var result = args.Result as EntityCollection;
-                    if (result != null)
-                    {
-                        MessageBox.Show($"Found {result.Entities.Count} accounts");
-                    }
-                }
-            });
-        }
 
         /// <summary>
         /// This event occurs when the plugin is closed
@@ -107,7 +67,77 @@ namespace SolutionConnectionReferenceReassignment
             }
         }
 
-        private void btn_LoadSolution_Click(object sender, EventArgs e)
+
+        private void cmb_SolutionList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var selected = cmb_SolutionList.SelectedItem as SolutionModel;
+            if (selected == null)
+                return;
+
+            dgv_Flows.DataSource = null;
+
+            WorkAsync(new WorkAsyncInfo
+            {
+                Message = "Loading flows...",
+                Work = (worker, args) =>
+                {
+                    var flowService = new FlowService(Service);
+                    args.Result = flowService.GetFlowsInSolution(selected.SolutionId);
+                },
+                PostWorkCallBack = args =>
+                {
+                    if (args.Error != null)
+                    {
+                        MessageBox.Show("Error loading flows: " + args.Error.Message);
+                        return;
+                    }
+
+                    var flows = (List<FlowModel>)args.Result;
+                    dgv_Flows.DataSource = flows;
+                    LogInfo($"Loaded {flows.Count} flows from solution: {selected.FriendlyName}");
+                }
+            });
+        }
+        private void dgv_Flows_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void dgv_Flows_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (dgv_Flows.CurrentRow == null)
+                return;
+
+            var selectedFlow = dgv_Flows.CurrentRow.DataBoundItem as FlowModel;
+            if (selectedFlow == null)
+                return;
+
+            var actionService = new FlowActionService(Service);
+            var actions = actionService.GetActionsFromFlow(selectedFlow.FlowId);
+            dgv_FlowActionList.DataSource = actions;
+        }
+
+        private void tsb_closetool_Click(object sender, EventArgs e)
+        {
+            CloseTool();
+        }
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/MatthewTDunn/ConnectionReferenceReassignmentTool");
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // TODO: your logic here
+        }
+
+        private void toolStripLabel1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tsb_RefreshSolutionList_Click(object sender, EventArgs e)
         {
             if (Service == null)
             {
@@ -143,41 +173,11 @@ namespace SolutionConnectionReferenceReassignment
                     LogInfo($"Loaded {solutions.Count} solutions.");
                 }
 
-                
+
             });
         }
 
-        private void cmb_SolutionList_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var selected = cmb_SolutionList.SelectedItem as SolutionModel;
-            if (selected == null)
-                return;
-
-            dgv_Flows.DataSource = null;
-
-            WorkAsync(new WorkAsyncInfo
-            {
-                Message = "Loading flows...",
-                Work = (worker, args) =>
-                {
-                    var flowService = new FlowService(Service);
-                    args.Result = flowService.GetFlowsInSolution(selected.SolutionId);
-                },
-                PostWorkCallBack = args =>
-                {
-                    if (args.Error != null)
-                    {
-                        MessageBox.Show("Error loading flows: " + args.Error.Message);
-                        return;
-                    }
-
-                    var flows = (List<FlowModel>)args.Result;
-                    dgv_Flows.DataSource = flows;
-                    LogInfo($"Loaded {flows.Count} flows from solution: {selected.FriendlyName}");
-                }
-            });
-        }
-        private void dgv_Flows_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void cmb_SolutionList_Click(object sender, EventArgs e)
         {
 
         }

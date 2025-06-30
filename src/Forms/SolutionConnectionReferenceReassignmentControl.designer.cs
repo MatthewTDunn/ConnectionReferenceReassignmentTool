@@ -24,117 +24,191 @@ namespace SolutionConnectionReferenceReassignment
 
         #region Code généré par le Concepteur de composants
 
+        private System.Windows.Forms.ToolStripComboBox tsb_cmb_SolutionList;
+
         /// <summary> 
         /// Méthode requise pour la prise en charge du concepteur - ne modifiez pas 
         /// le contenu de cette méthode avec l'éditeur de code.
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SolutionConnectionReferenceReassignmentControl));
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
-            this.tsbClose = new System.Windows.Forms.ToolStripButton();
-            this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsbSample = new System.Windows.Forms.ToolStripButton();
-            this.label1 = new System.Windows.Forms.Label();
-            this.btn_LoadSolution = new System.Windows.Forms.Button();
-            this.cmb_SolutionList = new System.Windows.Forms.ComboBox();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.tsb_Close = new System.Windows.Forms.ToolStripButton();
+            this.tsb_About = new System.Windows.Forms.ToolStripButton();
+            this.cmb_SolutionList = new System.Windows.Forms.ToolStripComboBox();
+            this.tsb_RefreshSolutionList = new System.Windows.Forms.ToolStripButton();
+            this.tsb_YouTube = new System.Windows.Forms.ToolStripButton();
             this.dgv_Flows = new System.Windows.Forms.DataGridView();
+            this.dgv_FlowActionList = new System.Windows.Forms.DataGridView();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.toolStripMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Flows)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_FlowActionList)).BeginInit();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripMenu
             // 
             this.toolStripMenu.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStripMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsbClose,
-            this.tssSeparator1,
-            this.tsbSample});
+            this.toolStripLabel1,
+            this.tsb_Close,
+            this.tsb_About,
+            this.cmb_SolutionList,
+            this.tsb_RefreshSolutionList,
+            this.tsb_YouTube});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
             this.toolStripMenu.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStripMenu.Size = new System.Drawing.Size(927, 27);
+            this.toolStripMenu.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.toolStripMenu.Size = new System.Drawing.Size(756, 31);
             this.toolStripMenu.TabIndex = 4;
             this.toolStripMenu.Text = "toolStrip1";
             // 
-            // tsbClose
+            // toolStripLabel1
             // 
-            this.tsbClose.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbClose.Name = "tsbClose";
-            this.tsbClose.Size = new System.Drawing.Size(107, 24);
-            this.tsbClose.Text = "Close this tool";
-            this.tsbClose.Click += new System.EventHandler(this.tsbClose_Click);
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(196, 28);
+            this.toolStripLabel1.Text = "Select Unmanaged Solution:";
+            this.toolStripLabel1.Click += new System.EventHandler(this.toolStripLabel1_Click);
             // 
-            // tssSeparator1
+            // tsb_Close
             // 
-            this.tssSeparator1.Name = "tssSeparator1";
-            this.tssSeparator1.Size = new System.Drawing.Size(6, 27);
+            this.tsb_Close.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsb_Close.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsb_Close.Image = global::SolutionConnectionReferenceReassignment.Properties.Resources.close_tool;
+            this.tsb_Close.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsb_Close.Name = "tsb_Close";
+            this.tsb_Close.Size = new System.Drawing.Size(29, 28);
+            this.tsb_Close.Text = "Close this tool";
+            this.tsb_Close.Click += new System.EventHandler(this.tsb_closetool_Click);
             // 
-            // tsbSample
+            // tsb_About
             // 
-            this.tsbSample.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbSample.Name = "tsbSample";
-            this.tsbSample.Size = new System.Drawing.Size(57, 24);
-            this.tsbSample.Text = "Try me";
-            this.tsbSample.Click += new System.EventHandler(this.tsbSample_Click);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 38);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(995, 16);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "This Tool is Designed to Bulk Update Connection References at the Action Level wi" +
-    "thin Power Automate Flows to Reduce Some Overhead of Ownership Reassignmetn";
-            // 
-            // btn_LoadSolution
-            // 
-            this.btn_LoadSolution.Location = new System.Drawing.Point(16, 74);
-            this.btn_LoadSolution.Name = "btn_LoadSolution";
-            this.btn_LoadSolution.Size = new System.Drawing.Size(204, 23);
-            this.btn_LoadSolution.TabIndex = 6;
-            this.btn_LoadSolution.Text = "Load Environment Solution List";
-            this.btn_LoadSolution.UseVisualStyleBackColor = true;
-            this.btn_LoadSolution.Click += new System.EventHandler(this.btn_LoadSolution_Click);
+            this.tsb_About.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsb_About.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsb_About.Image = global::SolutionConnectionReferenceReassignment.Properties.Resources.about_tool;
+            this.tsb_About.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsb_About.Name = "tsb_About";
+            this.tsb_About.Size = new System.Drawing.Size(29, 28);
+            this.tsb_About.Text = "About this tool";
+            this.tsb_About.Click += new System.EventHandler(this.toolStripButton1_Click);
             // 
             // cmb_SolutionList
             // 
-            this.cmb_SolutionList.FormattingEnabled = true;
-            this.cmb_SolutionList.Location = new System.Drawing.Point(226, 74);
+            this.cmb_SolutionList.BackColor = System.Drawing.Color.Wheat;
+            this.cmb_SolutionList.DropDownWidth = 300;
+            this.cmb_SolutionList.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.cmb_SolutionList.Name = "cmb_SolutionList";
-            this.cmb_SolutionList.Size = new System.Drawing.Size(497, 24);
-            this.cmb_SolutionList.TabIndex = 7;
+            this.cmb_SolutionList.Size = new System.Drawing.Size(300, 31);
             this.cmb_SolutionList.SelectedIndexChanged += new System.EventHandler(this.cmb_SolutionList_SelectedIndexChanged);
+            this.cmb_SolutionList.Click += new System.EventHandler(this.cmb_SolutionList_Click);
+            // 
+            // tsb_RefreshSolutionList
+            // 
+            this.tsb_RefreshSolutionList.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsb_RefreshSolutionList.Image = global::SolutionConnectionReferenceReassignment.Properties.Resources.refresh_tool;
+            this.tsb_RefreshSolutionList.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsb_RefreshSolutionList.Name = "tsb_RefreshSolutionList";
+            this.tsb_RefreshSolutionList.Size = new System.Drawing.Size(29, 28);
+            this.tsb_RefreshSolutionList.Text = "Refresh Solution List";
+            this.tsb_RefreshSolutionList.Click += new System.EventHandler(this.tsb_RefreshSolutionList_Click);
+            // 
+            // tsb_YouTube
+            // 
+            this.tsb_YouTube.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsb_YouTube.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsb_YouTube.Image = global::SolutionConnectionReferenceReassignment.Properties.Resources.youtube_tool1;
+            this.tsb_YouTube.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsb_YouTube.Name = "tsb_YouTube";
+            this.tsb_YouTube.Size = new System.Drawing.Size(29, 28);
+            this.tsb_YouTube.Text = "YouTube how to";
             // 
             // dgv_Flows
             // 
+            this.dgv_Flows.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dgv_Flows.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv_Flows.Location = new System.Drawing.Point(16, 114);
+            this.dgv_Flows.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgv_Flows.Location = new System.Drawing.Point(3, 3);
             this.dgv_Flows.Name = "dgv_Flows";
             this.dgv_Flows.RowHeadersWidth = 51;
             this.dgv_Flows.RowTemplate.Height = 24;
-            this.dgv_Flows.Size = new System.Drawing.Size(893, 150);
+            this.dgv_Flows.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgv_Flows.Size = new System.Drawing.Size(379, 397);
             this.dgv_Flows.TabIndex = 8;
-            this.dgv_Flows.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Flows_CellContentClick);
+            this.dgv_Flows.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Flows_CellContentDoubleClick);
+            // 
+            // dgv_FlowActionList
+            // 
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv_FlowActionList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            this.dgv_FlowActionList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgv_FlowActionList.DefaultCellStyle = dataGridViewCellStyle2;
+            this.dgv_FlowActionList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgv_FlowActionList.Location = new System.Drawing.Point(388, 3);
+            this.dgv_FlowActionList.Name = "dgv_FlowActionList";
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv_FlowActionList.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            this.dgv_FlowActionList.RowHeadersWidth = 51;
+            this.dgv_FlowActionList.RowTemplate.Height = 24;
+            this.dgv_FlowActionList.Size = new System.Drawing.Size(365, 397);
+            this.dgv_FlowActionList.TabIndex = 9;
+            this.dgv_FlowActionList.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.92593F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 49.07407F));
+            this.tableLayoutPanel1.Controls.Add(this.dgv_Flows, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.dgv_FlowActionList, 1, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 31);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 78.5575F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 21.4425F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(756, 513);
+            this.tableLayoutPanel1.TabIndex = 10;
             // 
             // SolutionConnectionReferenceReassignmentControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.dgv_Flows);
-            this.Controls.Add(this.cmb_SolutionList);
-            this.Controls.Add(this.btn_LoadSolution);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.toolStripMenu);
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "SolutionConnectionReferenceReassignmentControl";
-            this.PluginIcon = ((System.Drawing.Icon)(resources.GetObject("$this.PluginIcon")));
-            this.Size = new System.Drawing.Size(927, 370);
+            this.Size = new System.Drawing.Size(756, 544);
             this.Load += new System.EventHandler(this.MyPluginControl_Load);
             this.toolStripMenu.ResumeLayout(false);
             this.toolStripMenu.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Flows)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_FlowActionList)).EndInit();
+            this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -142,12 +216,14 @@ namespace SolutionConnectionReferenceReassignment
 
         #endregion
         private System.Windows.Forms.ToolStrip toolStripMenu;
-        private System.Windows.Forms.ToolStripButton tsbClose;
-        private System.Windows.Forms.ToolStripButton tsbSample;
-        private System.Windows.Forms.ToolStripSeparator tssSeparator1;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button btn_LoadSolution;
-        private System.Windows.Forms.ComboBox cmb_SolutionList;
         private System.Windows.Forms.DataGridView dgv_Flows;
+        private System.Windows.Forms.ToolStripButton tsb_Close;
+        private System.Windows.Forms.ToolStripButton tsb_About;
+        private System.Windows.Forms.DataGridView dgv_FlowActionList;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.ToolStripComboBox cmb_SolutionList;
+        private System.Windows.Forms.ToolStripButton tsb_RefreshSolutionList;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
+        private System.Windows.Forms.ToolStripButton tsb_YouTube;
     }
 }

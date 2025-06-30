@@ -8,8 +8,8 @@ namespace SolutionConnectionReferenceReassignment.Models
 {
     internal class FlowModel
     {
-        public Guid FlowId { get; set; }
         public string Name { get; set; }
+        public Guid FlowId { get; set; }
         public string Status => GetStatusText();
         public string State => GetStateText();
         public int StateCode {  get; set; }
