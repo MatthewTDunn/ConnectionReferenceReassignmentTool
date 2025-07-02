@@ -1,0 +1,110 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": { "connectionReferenceLogicalName": "slc_sharedcommondataserviceforapps_81c1e" },
+        "api": { "name": "shared_commondataserviceforapps" }
+      },
+      "shared_teams": {
+        "runtimeSource": "embedded",
+        "connection": { "connectionReferenceLogicalName": "slc_sharedteams_6d603" },
+        "api": { "name": "shared_teams" }
+      },
+      "shared_sharepointonline": {
+        "runtimeSource": "embedded",
+        "connection": { "connectionReferenceLogicalName": "slc_sharedsharepointonline_f5aeb" },
+        "api": { "name": "shared_sharepointonline" }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "When_a_row_is_added,_modified_or_deleted": {
+          "metadata": { "operationMetadataI d": "526a4d06-5b00-4b9a-a976-a4cf73df4fcb" },
+          "type": "OpenApiConnectionWebhook",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "SubscribeWebhookTrigger",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "subscriptionRequest/message": 1,
+              "subscriptionRequest/entityname": "account",
+              "subscriptionRequest/scope": 4,
+              "subscriptionRequest/filterexpression": "statecode eq null"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "Add_a_new_row": {
+          "runAfter": {},
+          "metadata": { "operationMetadataId": "f2f21780-41d9-43bf-90ca-43ca094ef1be" },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "CreateRecord",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "entityName": "contacts",
+              "item/lastname": "Matt Test"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "List_teams": {
+          "runAfter": { "Add_a_new_row": [ "Succeeded" ] },
+          "metadata": { "operationMetadataId": "d7c7ed3b-1e5d-432d-84db-444e58ceaaef" },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_teams",
+              "operationId": "GetAllTeams",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams"
+            },
+            "parameters": {},
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "List_folder": {
+          "runAfter": { "List_teams": [ "Succeeded" ] },
+          "metadata": {
+            "%252fLists": "/Lists",
+            "operationMetadataId": "d0108004-defb-4543-a18e-aad9e2415e32"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_sharepointonline",
+              "operationId": "ListFolder",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline"
+            },
+            "parameters": {
+              "dataset": "https://data3showcase.sharepoint.com",
+              "id": "%252fLists"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      }
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}

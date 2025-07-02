@@ -40,18 +40,13 @@ namespace SolutionConnectionReferenceReassignment.Services
 
             var obj = JsonConvert.DeserializeObject<JObject>(json);
 
-            var actions = obj?["definition"]?["actions"] as JObject;
+            var actions = obj?["properties"]?["definition"]?["actions"] as JObject;
             if (actions == null) return result;
 
             foreach (var prop in actions.Properties())
             {
                 var actionObj = prop.Value as JObject;
-                result.Add(new FlowActionModel
-                {
-                    Name = prop.Name,
-                    Type = actionObj?["type"]?.ToString() ?? "(unknown)",
-                    Kind = actionObj?["kind"]?.ToString() ?? "(unknown)"
-                });
+                result.Add(FlowActionModel.FromJson(prop.Name, actionObj));
             }
 
             return result;
