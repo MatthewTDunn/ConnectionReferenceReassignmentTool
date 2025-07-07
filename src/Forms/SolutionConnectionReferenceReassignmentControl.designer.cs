@@ -45,18 +45,14 @@ namespace SolutionConnectionReferenceReassignment
             this.dgv_Flows = new System.Windows.Forms.DataGridView();
             this.dgv_FlowActionList = new System.Windows.Forms.DataGridView();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.radioButton2 = new System.Windows.Forms.RadioButton();
-            this.radioButton1 = new System.Windows.Forms.RadioButton();
-            this.lbl_Flows = new System.Windows.Forms.Label();
             this.lbl_Actions = new System.Windows.Forms.Label();
+            this.lbl_Flows = new System.Windows.Forms.Label();
+            this.dgv_ConnectionReferenceList = new System.Windows.Forms.DataGridView();
             this.toolStripMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Flows)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_FlowActionList)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
-            this.tableLayoutPanel2.SuspendLayout();
-            this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_ConnectionReferenceList)).BeginInit();
             this.SuspendLayout();
             // 
             // toolStripMenu
@@ -141,12 +137,12 @@ namespace SolutionConnectionReferenceReassignment
             this.dgv_Flows.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dgv_Flows.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv_Flows.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv_Flows.Location = new System.Drawing.Point(3, 14);
+            this.dgv_Flows.Location = new System.Drawing.Point(3, 8);
             this.dgv_Flows.Name = "dgv_Flows";
             this.dgv_Flows.RowHeadersWidth = 51;
             this.dgv_Flows.RowTemplate.Height = 24;
             this.dgv_Flows.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgv_Flows.Size = new System.Drawing.Size(379, 231);
+            this.dgv_Flows.Size = new System.Drawing.Size(218, 120);
             this.dgv_Flows.TabIndex = 8;
             this.dgv_Flows.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Flows_CellContentClick_1);
             this.dgv_Flows.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Flows_CellContentDoubleClick);
@@ -171,7 +167,7 @@ namespace SolutionConnectionReferenceReassignment
             dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dgv_FlowActionList.DefaultCellStyle = dataGridViewCellStyle8;
             this.dgv_FlowActionList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv_FlowActionList.Location = new System.Drawing.Point(388, 14);
+            this.dgv_FlowActionList.Location = new System.Drawing.Point(227, 8);
             this.dgv_FlowActionList.Name = "dgv_FlowActionList";
             dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle9.BackColor = System.Drawing.SystemColors.Control;
@@ -183,78 +179,42 @@ namespace SolutionConnectionReferenceReassignment
             this.dgv_FlowActionList.RowHeadersDefaultCellStyle = dataGridViewCellStyle9;
             this.dgv_FlowActionList.RowHeadersWidth = 51;
             this.dgv_FlowActionList.RowTemplate.Height = 24;
-            this.dgv_FlowActionList.Size = new System.Drawing.Size(365, 231);
+            this.dgv_FlowActionList.Size = new System.Drawing.Size(526, 120);
             this.dgv_FlowActionList.TabIndex = 9;
             this.dgv_FlowActionList.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             // 
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.92593F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 49.07407F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 29.62963F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.37037F));
             this.tableLayoutPanel1.Controls.Add(this.dgv_FlowActionList, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.dgv_Flows, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.lbl_Actions, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.lbl_Flows, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.dgv_ConnectionReferenceList, 1, 2);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 31);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 3;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.504505F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 95.4955F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 264F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 381F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(756, 513);
             this.tableLayoutPanel1.TabIndex = 10;
             this.tableLayoutPanel1.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel1_Paint);
             // 
-            // tableLayoutPanel2
+            // lbl_Actions
             // 
-            this.tableLayoutPanel2.ColumnCount = 2;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.Controls.Add(this.groupBox1, 0, 0);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 251);
-            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 2;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 65.45454F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 34.54546F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(282, 110);
-            this.tableLayoutPanel2.TabIndex = 10;
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.radioButton2);
-            this.groupBox1.Controls.Add(this.radioButton1);
-            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox1.Location = new System.Drawing.Point(3, 3);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(135, 66);
-            this.groupBox1.TabIndex = 0;
-            this.groupBox1.TabStop = false;
-            // 
-            // radioButton2
-            // 
-            this.radioButton2.AutoSize = true;
-            this.radioButton2.Location = new System.Drawing.Point(6, 35);
-            this.radioButton2.Name = "radioButton2";
-            this.radioButton2.Size = new System.Drawing.Size(108, 20);
-            this.radioButton2.TabIndex = 1;
-            this.radioButton2.TabStop = true;
-            this.radioButton2.Text = "User Account";
-            this.radioButton2.UseVisualStyleBackColor = true;
-            // 
-            // radioButton1
-            // 
-            this.radioButton1.AutoSize = true;
-            this.radioButton1.Location = new System.Drawing.Point(6, 1);
-            this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(129, 20);
-            this.radioButton1.TabIndex = 0;
-            this.radioButton1.TabStop = true;
-            this.radioButton1.Text = "Service Principal";
-            this.radioButton1.UseVisualStyleBackColor = true;
-            this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
+            this.lbl_Actions.AutoSize = true;
+            this.lbl_Actions.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_Actions.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_Actions.Location = new System.Drawing.Point(227, 0);
+            this.lbl_Actions.Name = "lbl_Actions";
+            this.lbl_Actions.Size = new System.Drawing.Size(526, 5);
+            this.lbl_Actions.TabIndex = 12;
+            this.lbl_Actions.Text = "Actions Present in Your Flow";
+            this.lbl_Actions.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lbl_Flows
             // 
@@ -264,22 +224,22 @@ namespace SolutionConnectionReferenceReassignment
             this.lbl_Flows.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
             this.lbl_Flows.Location = new System.Drawing.Point(3, 0);
             this.lbl_Flows.Name = "lbl_Flows";
-            this.lbl_Flows.Size = new System.Drawing.Size(379, 11);
+            this.lbl_Flows.Size = new System.Drawing.Size(218, 5);
             this.lbl_Flows.TabIndex = 11;
             this.lbl_Flows.Text = "List of Flows Present in Your Unmanaged Solution";
             this.lbl_Flows.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // lbl_Actions
+            // dgv_ConnectionReferenceList
             // 
-            this.lbl_Actions.AutoSize = true;
-            this.lbl_Actions.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_Actions.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_Actions.Location = new System.Drawing.Point(388, 0);
-            this.lbl_Actions.Name = "lbl_Actions";
-            this.lbl_Actions.Size = new System.Drawing.Size(365, 11);
-            this.lbl_Actions.TabIndex = 12;
-            this.lbl_Actions.Text = "Actions Present in Your Flow";
-            this.lbl_Actions.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.dgv_ConnectionReferenceList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv_ConnectionReferenceList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgv_ConnectionReferenceList.Location = new System.Drawing.Point(227, 134);
+            this.dgv_ConnectionReferenceList.Name = "dgv_ConnectionReferenceList";
+            this.dgv_ConnectionReferenceList.RowHeadersWidth = 51;
+            this.dgv_ConnectionReferenceList.RowTemplate.Height = 24;
+            this.dgv_ConnectionReferenceList.Size = new System.Drawing.Size(526, 376);
+            this.dgv_ConnectionReferenceList.TabIndex = 13;
+            this.dgv_ConnectionReferenceList.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_ConnectionReferenceList_CellContentClick);
             // 
             // SolutionConnectionReferenceReassignmentControl
             // 
@@ -297,9 +257,7 @@ namespace SolutionConnectionReferenceReassignment
             ((System.ComponentModel.ISupportInitialize)(this.dgv_FlowActionList)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
-            this.tableLayoutPanel2.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_ConnectionReferenceList)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -316,11 +274,8 @@ namespace SolutionConnectionReferenceReassignment
         private System.Windows.Forms.ToolStripButton tsb_RefreshSolutionList;
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripButton tsb_YouTube;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.RadioButton radioButton2;
-        private System.Windows.Forms.RadioButton radioButton1;
         private System.Windows.Forms.Label lbl_Actions;
         private System.Windows.Forms.Label lbl_Flows;
+        private System.Windows.Forms.DataGridView dgv_ConnectionReferenceList;
     }
 }

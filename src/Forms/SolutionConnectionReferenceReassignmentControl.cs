@@ -2,8 +2,10 @@
 using Microsoft.Xrm.Sdk;
 using SolutionConnectionReferenceReassignment.Models;
 using SolutionConnectionReferenceReassignment.Services;
+using SolutionConnectionReferenceReassignment.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 
@@ -75,29 +77,60 @@ namespace SolutionConnectionReferenceReassignment
                 return;
 
             dgv_Flows.DataSource = null;
+            dgv_ConnectionReferenceList.DataSource = null;
+
+            LogInfo("This is a PluginLog");
 
             WorkAsync(new WorkAsyncInfo
             {
-                Message = "Loading flows...",
+                Message = "Loading flows and connection references...",
                 Work = (worker, args) =>
                 {
-                    var flowService = new FlowService(Service);
-                    args.Result = flowService.GetFlowsInSolution(selected.SolutionId);
+                    // Step 1: Get flow metadata list (unchanged)
+                    var flowService = new FlowMetadataService(Service);
+                    var flows = flowService.GetFlowsInSolution(selected.SolutionId);
+
+                    // Step 2: Use orchestrator to get all connection references
+                    var orchestrator = new FlowDefinitionOrchestrator(Service);
+                    var (_, connectionReferences) = orchestrator.GetSolutionFlowDefinitionData(selected.SolutionId);
+
+                    args.Result = new
+                    {
+                        Flows = flows,
+                        ConnectionReferences = connectionReferences
+                    };
                 },
                 PostWorkCallBack = args =>
                 {
                     if (args.Error != null)
                     {
-                        MessageBox.Show("Error loading flows: " + args.Error.Message);
+                        MessageBox.Show("Error loading flows or references: " + args.Error.Message);
                         return;
                     }
 
-                    var flows = (List<FlowModel>)args.Result;
+                    dynamic result = args.Result;
+                    var flows = (List<FlowMetadataModel>)result.Flows;
+                    var connectionReferences = (List<FlowConnectionReferenceModel>)result.ConnectionReferences;
+
+                    if (connectionReferences.Count == 0)
+                    {
+                        connectionReferences.Add(new FlowConnectionReferenceModel
+                        {
+                            Name = "test_name",
+                            LogicalName = "test_logical",
+                            RuntimeSource = "test_source",
+                            DisplayName = "Test Display"
+                        });
+                    }
+
                     dgv_Flows.DataSource = flows;
-                    LogInfo($"Loaded {flows.Count} flows from solution: {selected.FriendlyName}");
+                    dgv_ConnectionReferenceList.DataSource = connectionReferences;
+
+                    LogInfo($"Loaded {flows.Count} flows and {connectionReferences?.Count} connection references from solution: {selected.FriendlyName}");
                 }
             });
         }
+
         private void dgv_Flows_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
@@ -105,16 +138,7 @@ namespace SolutionConnectionReferenceReassignment
 
         private void dgv_Flows_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (dgv_Flows.CurrentRow == null)
-                return;
 
-            var selectedFlow = dgv_Flows.CurrentRow.DataBoundItem as FlowModel;
-            if (selectedFlow == null)
-                return;
-
-            var actionService = new FlowActionService(Service);
-            var actions = actionService.GetActionsFromFlow(selectedFlow.FlowId);
-            dgv_FlowActionList.DataSource = actions;
         }
 
         private void tsb_closetool_Click(object sender, EventArgs e)
@@ -164,11 +188,15 @@ namespace SolutionConnectionReferenceReassignment
 
                     var solutions = (List<SolutionModel>)args.Result;
 
+                    cmb_SolutionList.SelectedIndexChanged -= cmb_SolutionList_SelectedIndexChanged; // temporarily remove the indexchanged event for the combo box as we don't want it to trigger immediately on solution list load
+
                     cmb_SolutionList.Items.Clear();
                     cmb_SolutionList.Items.AddRange(solutions.ToArray());
 
                     if (cmb_SolutionList.Items.Count > 0)
                         cmb_SolutionList.SelectedIndex = 0;
+
+                    cmb_SolutionList.SelectedIndexChanged += cmb_SolutionList_SelectedIndexChanged; // re-attach
 
                     LogInfo($"Loaded {solutions.Count} solutions.");
                 }
@@ -193,6 +221,11 @@ namespace SolutionConnectionReferenceReassignment
         }
 
         private void dgv_Flows_CellContentClick_1(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void dgv_ConnectionReferenceList_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
         }

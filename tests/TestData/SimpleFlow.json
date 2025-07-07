@@ -96,7 +96,7 @@
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline"
             },
             "parameters": {
-              "dataset": "https://data3showcase.sharepoint.com",
+              "dataset": "https://websitereference.com.au",
               "id": "%252fLists"
             },
             "authentication": "@parameters('$authentication')"

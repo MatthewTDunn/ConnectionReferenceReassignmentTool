@@ -235,7 +235,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\FlowActionModel.cs" />
-    <Compile Include="Models\FlowModel.cs" />
+    <Compile Include="Models\FlowConnectionReferenceModel.cs" />
+    <Compile Include="Models\FlowMetadataModel.cs" />
     <Compile Include="Models\SolutionModel.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -243,7 +244,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Services\FlowActionService.cs" />
-    <Compile Include="Services\FlowService.cs" />
+    <Compile Include="Services\FlowMetadataService.cs" />
     <Compile Include="Services\SolutionService.cs" />
     <Compile Include="ToolCore\SolutionConnectionReferenceReassignment.cs" />
     <Compile Include="Forms\SolutionConnectionReferenceReassignmentControl.cs">
@@ -254,15 +255,15 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="Utilities\FlowDefinitionOrchestrator.cs" />
+    <Compile Include="Utilities\FlowJSONParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="tmp\notes.md" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Utilities\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="Forms\SolutionConnectionReferenceReassignmentControl.resx">
       <DependentUpon>SolutionConnectionReferenceReassignmentControl.cs</DependentUpon>

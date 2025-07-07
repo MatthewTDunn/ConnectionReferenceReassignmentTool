@@ -22,34 +22,6 @@ namespace SolutionConnectionReferenceReassignment.Services
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
-        public List<FlowActionModel> GetActionsFromFlow(Guid flowId)
-        {
-            var flow = _service.Retrieve("workflow", flowId, new ColumnSet("name", "clientdata"));
-            var clientData = flow.GetAttributeValue<string>("clientdata");
 
-            if (string.IsNullOrWhiteSpace(clientData))
-                return new List<FlowActionModel>();
-
-            var actions = ParseActionsFromJson(clientData);
-            return actions;
-        }
-
-        private List<FlowActionModel> ParseActionsFromJson(string json)
-        {
-            var result = new List<FlowActionModel>();
-
-            var obj = JsonConvert.DeserializeObject<JObject>(json);
-
-            var actions = obj?["properties"]?["definition"]?["actions"] as JObject;
-            if (actions == null) return result;
-
-            foreach (var prop in actions.Properties())
-            {
-                var actionObj = prop.Value as JObject;
-                result.Add(FlowActionModel.FromJson(prop.Name, actionObj));
-            }
-
-            return result;
-        }
     }
 }

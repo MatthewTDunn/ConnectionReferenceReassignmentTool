@@ -9,16 +9,16 @@ using System.Threading.Tasks;
 
 namespace SolutionConnectionReferenceReassignment.Services
 {
-    internal class FlowService
+    internal class FlowMetadataService
     {
         private readonly IOrganizationService _service;
 
-        public FlowService(IOrganizationService service)
+        public FlowMetadataService(IOrganizationService service)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
-        public List<FlowModel> GetFlowsInSolution(Guid solutionId)
+        public List<FlowMetadataModel> GetFlowsInSolution(Guid solutionId)
         {
             var componentQuery = new QueryExpression("solutioncomponent")
             {
@@ -38,13 +38,13 @@ namespace SolutionConnectionReferenceReassignment.Services
                 .Select(e => e.GetAttributeValue<Guid>("objectid"))
                 .ToList();
 
-            var flows = new List<FlowModel>();
+            var flows = new List<FlowMetadataModel>();
 
             foreach (var flowId in flowComponentIds)
             {
                 var flow = _service.Retrieve("workflow", flowId, new ColumnSet("name", "statecode", "statuscode"));
 
-                flows.Add(new FlowModel
+                flows.Add(new FlowMetadataModel
                 {
                     Name = flow.GetAttributeValue<string>("name"),
                     FlowId = flow.Id,

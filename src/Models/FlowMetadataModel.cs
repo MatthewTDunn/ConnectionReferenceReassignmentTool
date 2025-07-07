@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SolutionConnectionReferenceReassignment.Models
 {
-    internal class FlowModel
+    internal class FlowMetadataModel
     {
         public string Name { get; set; }
         public Guid FlowId { get; set; }
