@@ -13,5 +13,7 @@ namespace SolutionConnectionReferenceReassignment.Models
         public string Name { get; set; }
         public string LogicalName { get; set; }
         public string RuntimeSource { get; set; }
+        public string ReplacementConnectionReference { get; set; }
+        public bool AssignmentValid { get; set; }
     }
 }

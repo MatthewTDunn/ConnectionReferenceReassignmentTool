@@ -44,7 +44,6 @@ namespace SolutionConnectionReferenceReassignment.Utilities
 
             var solutionComponents = _service.RetrieveMultiple(solutionComponentQuery).Entities;
 
-            // Extract workflow IDs
             var workflowIds = solutionComponents.Select(sc => sc.GetAttributeValue<Guid>("objectid")).ToList();
 
             if (!workflowIds.Any())
@@ -53,7 +52,6 @@ namespace SolutionConnectionReferenceReassignment.Utilities
                 return (new List<FlowActionModel>(), new List<FlowConnectionReferenceModel>());
             }
 
-            // Step 2: Retrieve the workflows by their IDs
             var workflowQuery = new QueryExpression("workflow")
             {
                 ColumnSet = new ColumnSet("workflowid", "name", "clientdata"),
@@ -68,7 +66,6 @@ namespace SolutionConnectionReferenceReassignment.Utilities
 
             var workflows = _service.RetrieveMultiple(workflowQuery).Entities;
 
-            // Proceed with parsing clientdata from these workflows
             foreach (var flow in workflows)
             {
                 var solutionFlowClientData = flow.GetAttributeValue<string>("clientdata");
@@ -83,10 +80,9 @@ namespace SolutionConnectionReferenceReassignment.Utilities
                 }
                 catch (JsonException)
                 {
-                    // Log or handle JSON parse error
+                    // TODO: MATT HANDLE LOG LOGIC IF REQUIRED
                 }
 
-                // Your existing parsing logic
                 actions.AddRange(FlowJSONParser.ParseFlowActions(clientData));
                 connectionReferences.AddRange(FlowJSONParser.ParseFlowConnectionReferences(clientData));
             }

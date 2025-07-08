@@ -1,15 +1,13 @@
-﻿using Microsoft.Xrm.Sdk.Query;
-using Microsoft.Xrm.Sdk;
+﻿using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Query;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SolutionConnectionReferenceReassignment.Models;
+using SolutionConnectionReferenceReassignment.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Microsoft.Rest.Serialization;
-using System.Diagnostics.Eventing.Reader;
+using System.Windows.Forms;
 
 namespace SolutionConnectionReferenceReassignment.Services
 {
@@ -22,6 +20,52 @@ namespace SolutionConnectionReferenceReassignment.Services
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
+        public List<FlowActionModel> GetFlowActions(Guid workflowId)
+        {
+            var actions = new List<FlowActionModel>();
 
+            var workflowQuery = new QueryExpression("workflow")
+            {
+                ColumnSet = new ColumnSet("workflowid", "name", "clientdata"),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+            {
+                new ConditionExpression("workflowid", ConditionOperator.Equal, workflowId)
+            }
+                }
+            };
+
+            var workflows = _service.RetrieveMultiple(workflowQuery).Entities;
+
+            if (!workflows.Any())
+            {
+                MessageBox.Show("Flow not found.");
+                return actions;
+            }
+
+            var flow = workflows.First();
+            var clientData = flow.GetAttributeValue<string>("clientdata");
+
+            if (string.IsNullOrWhiteSpace(clientData))
+                return actions;
+
+            JObject clientDataJson = null;
+            try
+            {
+                clientDataJson = JsonConvert.DeserializeObject<JObject>(clientData);
+            }
+            catch (JsonException)
+            {
+                // TODO: MATT LOG IF NEEDED AT SOME POINT
+            }
+
+            if (clientDataJson != null)
+            {
+                actions.AddRange(FlowJSONParser.ParseFlowActions(clientDataJson));
+            }
+
+            return actions;
+        }
     }
 }

@@ -3,7 +3,7 @@
 ![.NET](https://img.shields.io/badge/.NET-512BD4?logo=dotnet&logoColor=white&style=flat-square)
 ![C#](https://img.shields.io/badge/C%23-239120?logo=c-sharp&logoColor=white&style=flat-square)
 ![GitHub Release](https://img.shields.io/github/v/release/MatthewTDunn/ConnectionReferenceReassignmentTool?style=flat-square)
-![License](https://img.shields.io/github/license/MatthewTDunn/ConnectionReferenceReassignmentTool?style=flat-square)
+![Licence](https://img.shields.io/github/license/MatthewTDunn/ConnectionReferenceReassignmentTool?style=flat-square)
 ![Changelog](https://img.shields.io/badge/Changelog-Yes-brightgreen?style=flat-square)
 
 ## 📦 Overview

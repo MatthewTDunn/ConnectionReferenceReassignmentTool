@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xrm.Sdk;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
@@ -23,8 +24,7 @@ namespace SolutionConnectionReferenceReassignment
         ExportMetadata("SecondaryFontColor", "Blue")]
     public class SolutionConnectionReferenceReassignment : PluginBase
     {
-
-
+        
         public override IXrmToolBoxPluginControl GetControl()
         {
             return new SolutionConnectionReferenceReassignmentControl();

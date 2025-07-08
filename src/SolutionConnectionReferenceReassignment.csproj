@@ -245,6 +245,7 @@
     </Compile>
     <Compile Include="Services\FlowActionService.cs" />
     <Compile Include="Services\FlowMetadataService.cs" />
+    <Compile Include="Services\OwnedConnectionReferenceService.cs" />
     <Compile Include="Services\SolutionService.cs" />
     <Compile Include="ToolCore\SolutionConnectionReferenceReassignment.cs" />
     <Compile Include="Forms\SolutionConnectionReferenceReassignmentControl.cs">
