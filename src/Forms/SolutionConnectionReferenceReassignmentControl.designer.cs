@@ -33,9 +33,9 @@ namespace SolutionConnectionReferenceReassignment
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SolutionConnectionReferenceReassignmentControl));
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
@@ -136,81 +136,83 @@ namespace SolutionConnectionReferenceReassignment
             // 
             // dgv_FlowActionList
             // 
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv_FlowActionList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
+            this.dgv_FlowActionList.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv_FlowActionList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.dgv_FlowActionList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgv_FlowActionList.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgv_FlowActionList.DefaultCellStyle = dataGridViewCellStyle2;
             this.dgv_FlowActionList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv_FlowActionList.Location = new System.Drawing.Point(3, 3);
             this.dgv_FlowActionList.Name = "dgv_FlowActionList";
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv_FlowActionList.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv_FlowActionList.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dgv_FlowActionList.RowHeadersWidth = 51;
             this.dgv_FlowActionList.RowTemplate.Height = 24;
-            this.dgv_FlowActionList.Size = new System.Drawing.Size(901, 214);
+            this.dgv_FlowActionList.Size = new System.Drawing.Size(878, 214);
             this.dgv_FlowActionList.TabIndex = 9;
             this.dgv_FlowActionList.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             // 
             // dgv_ConnectionReferenceList
             // 
+            this.dgv_ConnectionReferenceList.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgv_ConnectionReferenceList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv_ConnectionReferenceList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv_ConnectionReferenceList.Location = new System.Drawing.Point(3, 223);
             this.dgv_ConnectionReferenceList.Name = "dgv_ConnectionReferenceList";
             this.dgv_ConnectionReferenceList.RowHeadersWidth = 51;
             this.dgv_ConnectionReferenceList.RowTemplate.Height = 24;
-            this.dgv_ConnectionReferenceList.Size = new System.Drawing.Size(901, 282);
+            this.dgv_ConnectionReferenceList.Size = new System.Drawing.Size(878, 282);
             this.dgv_ConnectionReferenceList.TabIndex = 13;
-            this.dgv_ConnectionReferenceList.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_ConnectionReferenceList_CellContentClick);
+            this.dgv_ConnectionReferenceList.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_ConnectionReferenceList_CellValueChanged);
             // 
             // tbllay_ScreenContainer
             // 
             this.tbllay_ScreenContainer.ColumnCount = 2;
-            this.tbllay_ScreenContainer.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbllay_ScreenContainer.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 913F));
+            this.tbllay_ScreenContainer.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tbllay_ScreenContainer.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 75F));
             this.tbllay_ScreenContainer.Controls.Add(this.tbllay_dgvcontrols, 1, 0);
             this.tbllay_ScreenContainer.Controls.Add(this.tree_SolutionFlowExplorer, 0, 0);
             this.tbllay_ScreenContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tbllay_ScreenContainer.Location = new System.Drawing.Point(0, 31);
             this.tbllay_ScreenContainer.Name = "tbllay_ScreenContainer";
             this.tbllay_ScreenContainer.RowCount = 1;
-            this.tbllay_ScreenContainer.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tbllay_ScreenContainer.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tbllay_ScreenContainer.Size = new System.Drawing.Size(1186, 767);
             this.tbllay_ScreenContainer.TabIndex = 11;
             // 
             // tbllay_dgvcontrols
             // 
             this.tbllay_dgvcontrols.ColumnCount = 1;
-            this.tbllay_dgvcontrols.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tbllay_dgvcontrols.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tbllay_dgvcontrols.Controls.Add(this.dgv_FlowActionList, 0, 0);
             this.tbllay_dgvcontrols.Controls.Add(this.dgv_ConnectionReferenceList, 0, 1);
             this.tbllay_dgvcontrols.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tbllay_dgvcontrols.Location = new System.Drawing.Point(276, 3);
+            this.tbllay_dgvcontrols.Location = new System.Drawing.Point(299, 3);
             this.tbllay_dgvcontrols.Name = "tbllay_dgvcontrols";
             this.tbllay_dgvcontrols.RowCount = 3;
             this.tbllay_dgvcontrols.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 43.25581F));
             this.tbllay_dgvcontrols.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 56.74419F));
             this.tbllay_dgvcontrols.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 252F));
-            this.tbllay_dgvcontrols.Size = new System.Drawing.Size(907, 761);
+            this.tbllay_dgvcontrols.Size = new System.Drawing.Size(884, 761);
             this.tbllay_dgvcontrols.TabIndex = 0;
             // 
             // tree_SolutionFlowExplorer
@@ -221,7 +223,7 @@ namespace SolutionConnectionReferenceReassignment
             this.tree_SolutionFlowExplorer.Location = new System.Drawing.Point(3, 3);
             this.tree_SolutionFlowExplorer.Name = "tree_SolutionFlowExplorer";
             this.tree_SolutionFlowExplorer.SelectedImageIndex = 0;
-            this.tree_SolutionFlowExplorer.Size = new System.Drawing.Size(267, 761);
+            this.tree_SolutionFlowExplorer.Size = new System.Drawing.Size(290, 761);
             this.tree_SolutionFlowExplorer.TabIndex = 1;
             this.tree_SolutionFlowExplorer.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tree_SolutionFlowExplorer_AfterSelect);
             // 

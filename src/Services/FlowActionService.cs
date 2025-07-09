@@ -20,6 +20,14 @@ namespace SolutionConnectionReferenceReassignment.Services
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
+        public List<FlowActionModel> ParseActionsFromClientData(JObject clientData)
+        {
+            if (clientData == null)
+                return new List<FlowActionModel>();
+
+            return FlowJSONParser.ParseFlowActions(clientData);
+        }
+
         public List<FlowActionModel> GetFlowActions(Guid workflowId)
         {
             var actions = new List<FlowActionModel>();

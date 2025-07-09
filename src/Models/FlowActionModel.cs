@@ -9,10 +9,17 @@ namespace SolutionConnectionReferenceReassignment.Models
 {
     internal class FlowActionModel
     {
-        public string Name { get; set; }
-        public string Type {  get; set; }
+        #region Enriched FlowMetadata Properties
+        public string FlowName { get; set; } 
+        public Guid FlowId { get; set; }
+        #endregion
+
+        public string ActionName { get; set; }
         public string ConnectionName { get; set; }
-        public string OperationId { get ; set; }
+        public string OperationId { get; set; }
+        public string Type {  get; set; }
         public string Parameters { get; set; }
+
+        
     }
 }

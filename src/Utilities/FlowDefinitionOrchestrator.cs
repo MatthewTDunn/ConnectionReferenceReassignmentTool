@@ -3,6 +3,7 @@ using Microsoft.Xrm.Sdk.Query;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SolutionConnectionReferenceReassignment.Models;
+using SolutionConnectionReferenceReassignment.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ using System.Windows;
 
 namespace SolutionConnectionReferenceReassignment.Utilities
 {
-    // Thought it may be best to handle this via a helper as both the FlowAction service & FlowMetadata service utilise the same workflow.clientdata JSON.
+    // Thought it may be best to handle this via a helper as both the FlowAction & ConnectionReference service utilise the same workflow.clientdata JSON.
     // Parse from here to handle once and feed into appropriate services/models.
     internal class FlowDefinitionOrchestrator
     {
@@ -23,123 +24,54 @@ namespace SolutionConnectionReferenceReassignment.Utilities
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
-        public (List<FlowActionModel> Actions, List<FlowConnectionReferenceModel> ConnectionReferences) GetSolutionFlowDefinitionData(Guid solutionId)
+        public JObject GetClientData(Guid workflowId)
         {
-
-            var actions = new List<FlowActionModel>();
-            var connectionReferences = new List<FlowConnectionReferenceModel>();
-
-            var solutionComponentQuery = new QueryExpression("solutioncomponent")
+            var query = new QueryExpression("workflow")
             {
-                ColumnSet = new ColumnSet("objectid"),
+                ColumnSet = new ColumnSet("clientdata"),
                 Criteria = new FilterExpression
                 {
                     Conditions =
-        {
-            new ConditionExpression("solutionid", ConditionOperator.Equal, solutionId),
-            new ConditionExpression("componenttype", ConditionOperator.Equal, 29) // 29 = Workflow
+                {
+                    new ConditionExpression("workflowid", ConditionOperator.Equal, workflowId)
+                }
+                }
+            };
+
+            var workflows = _service.RetrieveMultiple(query).Entities;
+
+            if (!workflows.Any())
+            {
+                MessageBox.Show("Flow not found.");
+                return null;
+            }
+
+            var clientDataRaw = workflows.First().GetAttributeValue<string>("clientdata");
+            if (string.IsNullOrWhiteSpace(clientDataRaw))
+                return null;
+
+            try
+            {
+                return JsonConvert.DeserializeObject<JObject>(clientDataRaw);
+            }
+            catch (JsonException ex)
+            {
+                MessageBox.Show($"Error parsing clientData: {ex.Message}");
+                return null;
+            }
         }
-                }
-            };
 
-            var solutionComponents = _service.RetrieveMultiple(solutionComponentQuery).Entities;
+        public (List<FlowActionModel> Actions, List<ConnectionReferenceModel> ConnectionReferences) GetParsedFlowDefinition(Guid workflowId)
+        {
+            var clientData = GetClientData(workflowId);
 
-            var workflowIds = solutionComponents.Select(sc => sc.GetAttributeValue<Guid>("objectid")).ToList();
+            if (clientData == null)
+                return (new List<FlowActionModel>(), new List<ConnectionReferenceModel>());
 
-            if (!workflowIds.Any())
-            {
-                MessageBox.Show("No modern flows found in this solution.");
-                return (new List<FlowActionModel>(), new List<FlowConnectionReferenceModel>());
-            }
-
-            var workflowQuery = new QueryExpression("workflow")
-            {
-                ColumnSet = new ColumnSet("workflowid", "name", "clientdata"),
-                Criteria = new FilterExpression
-                {
-                    Conditions =
-                    {
-                        new ConditionExpression("workflowid", ConditionOperator.In, workflowIds.Cast<object>().ToArray())
-                    }
-                }
-            };
-
-            var workflows = _service.RetrieveMultiple(workflowQuery).Entities;
-
-            foreach (var flow in workflows)
-            {
-                var solutionFlowClientData = flow.GetAttributeValue<string>("clientdata");
-                if (string.IsNullOrWhiteSpace(solutionFlowClientData))
-                    continue;
-
-                JObject clientData = null;
-                try
-                {
-                    clientData = JsonConvert.DeserializeObject<JObject>(solutionFlowClientData);
-
-                }
-                catch (JsonException)
-                {
-                    // TODO: MATT HANDLE LOG LOGIC IF REQUIRED
-                }
-
-                actions.AddRange(FlowJSONParser.ParseFlowActions(clientData));
-                connectionReferences.AddRange(FlowJSONParser.ParseFlowConnectionReferences(clientData));
-            }
-
-            var enricher = new ConnectionReferenceEnricher(_service);
-            enricher.DisplayNameEnrichment(connectionReferences);
+            var actions = FlowJSONParser.ParseFlowActions(clientData);
+            var connectionReferences = FlowJSONParser.ParseFlowConnectionReferences(clientData);
 
             return (actions, connectionReferences);
-
         }
-
-
-    }
-
-    internal class ConnectionReferenceEnricher
-    {
-        private readonly IOrganizationService _service;
-
-        public ConnectionReferenceEnricher(IOrganizationService service)
-        {
-            _service = service ?? throw new ArgumentNullException(nameof(service));
-        }
-
-        public void DisplayNameEnrichment(List<FlowConnectionReferenceModel> connectionReference)
-        {
-            foreach (var reference in connectionReference)
-            {
-                try
-                {
-                    var query = new QueryExpression("connectionreference")
-                    {
-                        ColumnSet = new ColumnSet("connectionreferencedisplayname"),
-                        Criteria = new FilterExpression
-                        {
-                            Conditions =
-                            {
-                                new ConditionExpression("connectionreferencelogicalname", ConditionOperator.Equal, reference.LogicalName)
-                            }
-                        }
-                    };
-
-                    var result = _service.RetrieveMultiple(query);
-                    var entity = result.Entities.FirstOrDefault();
-
-                    reference.DisplayName = entity?.GetAttributeValue<string>("connectionreferencedisplayname") ?? reference.Name;
-                }
-                catch (Exception ex)
-                {
-                    reference.DisplayName = $"(error: {ex}";
-                }
-            }
-        }
-
-        public void ConnectionTypeEnrichment(List<FlowConnectionReferenceModel> connectionReference)
-        {
-
-        }
-
     }
 }

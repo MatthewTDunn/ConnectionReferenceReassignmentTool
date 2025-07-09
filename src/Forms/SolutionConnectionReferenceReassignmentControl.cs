@@ -17,6 +17,7 @@ namespace SolutionConnectionReferenceReassignment
     public partial class SolutionConnectionReferenceReassignmentControl : PluginControlBase
     {
         private Settings mySettings;
+        private List<ConnectionReferenceModel> ownedConnectionReferences = new List<ConnectionReferenceModel>();
 
         public SolutionConnectionReferenceReassignmentControl()
         {
@@ -24,8 +25,8 @@ namespace SolutionConnectionReferenceReassignment
             
             // Event subscriber list
             tree_SolutionFlowExplorer.BeforeExpand += tree_SolutionFlowExplorer_BeforeExpand;
-
             dgv_ConnectionReferenceList.CellFormatting += dgv_ConnectionReferenceList_CellFormatting;
+
 
         }
 
@@ -78,125 +79,27 @@ namespace SolutionConnectionReferenceReassignment
             }
         }
 
-        #region Solution Initialisation
 
         private void cmb_SolutionList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var selected = cmb_SolutionList.SelectedItem as SolutionModel;
-            if (selected == null)
-                return;
-
-            dgv_FlowActionList.DataSource = null;
-            dgv_ConnectionReferenceList.DataSource = null;
-
-            WorkAsync(new WorkAsyncInfo
-            {
-                Message = "Loading flows and connection references...",
-                Work = (worker, args) =>
-                {
-                    var flowService = new FlowMetadataService(Service);
-                    var flows = flowService.GetFlowsInSolution(selected.SolutionId);
-
-                    var orchestrator = new FlowDefinitionOrchestrator(Service);
-                    var (_, connectionReferences) = orchestrator.GetSolutionFlowDefinitionData(selected.SolutionId);
-
-                    args.Result = new
-                    {
-                        Flows = flows,
-                        ConnectionReferences = connectionReferences
-                    };
-                },
-                PostWorkCallBack = args =>
-                {
-                    if (args.Error != null)
-                    {
-                        MessageBox.Show("Error loading flows or references: " + args.Error.Message);
-                        return;
-                    }
-
-                    dynamic result = args.Result;
-                    var flows = (List<FlowMetadataModel>)result.Flows;
-                    var connectionReferences = (List<FlowConnectionReferenceModel>)result.ConnectionReferences;
-
-                    dgv_FlowActionList.DataSource = flows;
-                    dgv_ConnectionReferenceList.DataSource = connectionReferences;
-
-                    LogInfo($"Loaded {flows.Count} flows and {connectionReferences?.Count} connection references from solution: {selected.FriendlyName}");
-
-                    var replacementOptions = new List<string> { "connector a", "connector b" };
-                    SetupConnectionReferenceGrid(connectionReferences, replacementOptions);
-
-                }
-            });
+            
         }
 
-        private void SetupConnectionReferenceGrid(List<FlowConnectionReferenceModel> data, List<string> replacementOptions)
+        private void SetupConnectionReferenceGrid(List<ConnectionReferenceModel> data, List<string> replacementOptions)
         {
-            dgv_ConnectionReferenceList.AutoGenerateColumns = false;
-            dgv_ConnectionReferenceList.Columns.Clear();
-
-            dgv_ConnectionReferenceList.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Display Name",
-                DataPropertyName = "DisplayName",
-                ReadOnly = true
-            });
-            dgv_ConnectionReferenceList.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Name",
-                DataPropertyName = "Name",
-                ReadOnly = true
-            });
-            dgv_ConnectionReferenceList.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Logical Name",
-                DataPropertyName = "LogicalName",
-                ReadOnly = true
-            });
-            dgv_ConnectionReferenceList.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Runtime Source",
-                DataPropertyName = "RuntimeSource",
-                ReadOnly = true
-            });
-
-            var comboColumn = new DataGridViewComboBoxColumn
-            {
-                HeaderText = "Replacement Connection Reference",
-                DataPropertyName = "ReplacementConnectionReference",
-                DataSource = replacementOptions,
-                FlatStyle = FlatStyle.Flat
-            };
-            dgv_ConnectionReferenceList.Columns.Add(comboColumn);
-
-            var assignmentValidColumn = new DataGridViewCheckBoxColumn
-            {
-                HeaderText = "Assignment Valid",
-                DataPropertyName = "AssignmentValid",
-                ReadOnly = true
-            };
-            dgv_ConnectionReferenceList.Columns.Add(assignmentValidColumn);
-
-            dgv_ConnectionReferenceList.DataSource = data;
+            
         }
 
         private void dgv_ConnectionReferenceList_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (dgv_ConnectionReferenceList.Columns[e.ColumnIndex].DataPropertyName == "AssignmentValid")
+            if (dgv_ConnectionReferenceList.Columns[e.ColumnIndex].Name == "Reassign")
             {
-                bool isValid = (bool)e.Value;
-                e.CellStyle.BackColor = isValid ? Color.LightGreen : Color.LightCoral;
+                e.CellStyle.BackColor = Color.LightGray;
             }
         }
 
 
-        #endregion
 
-
-        private void dgv_Flows_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
 
         private void dgv_Flows_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -262,7 +165,6 @@ namespace SolutionConnectionReferenceReassignment
 
                     LogInfo($"Loaded {solutions.Count} solutions.");
 
-                    // ✅ Update TreeView
                     tree_SolutionFlowExplorer.BeginUpdate();
                     tree_SolutionFlowExplorer.Nodes.Clear();
 
@@ -280,7 +182,6 @@ namespace SolutionConnectionReferenceReassignment
                             SelectedImageKey = "treeicon_solution.png"
                         };
 
-                        // Optional placeholder node for lazy loading
                         solutionNode.Nodes.Add(new TreeNode("Loading..."));
 
                         environmentNode.Nodes.Add(solutionNode);
@@ -291,8 +192,6 @@ namespace SolutionConnectionReferenceReassignment
 
                     tree_SolutionFlowExplorer.EndUpdate();
                 }
-
-
             });
         }
 
@@ -311,46 +210,112 @@ namespace SolutionConnectionReferenceReassignment
 
         }
 
-        private void dgv_Flows_CellContentClick_1(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
-        private void dgv_ConnectionReferenceList_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
         private void tree_SolutionFlowExplorer_AfterSelect(object sender, TreeViewEventArgs e)
         {
             var node = e.Node;
             if (node == null) return;
 
-            var actionService = new FlowActionService(Service);
+            var orchestrator = new FlowDefinitionOrchestrator(Service);
+            var enricher = new DataEnricher(Service);
+
             List<FlowActionModel> actions = new List<FlowActionModel>();
+            List<ConnectionReferenceModel> connectionReferences = new List<ConnectionReferenceModel>();
 
             if (node.Tag is SolutionModel solution)
             {
-                // Get all flows in the solution
                 var flowService = new FlowMetadataService(Service);
                 var flows = flowService.GetFlowsInSolution(solution.SolutionId);
 
                 foreach (var flow in flows)
                 {
-                    actions.AddRange(actionService.GetFlowActions(flow.FlowId));
+                    var (flowActions, flowConnectionReferences) = orchestrator.GetParsedFlowDefinition(flow.FlowId);
+                    enricher.EnrichFlowActionsWithFlowMetadata(flowActions, flow.Name, flow.FlowId);
+
+                    actions.AddRange(flowActions);
+                    connectionReferences.AddRange(flowConnectionReferences);
                 }
             }
             else if (node.Tag is FlowMetadataModel flowMetadata)
             {
-                actions = actionService.GetFlowActions(flowMetadata.FlowId);
+                var (flowActions, flowConnectionReferences) = orchestrator.GetParsedFlowDefinition(flowMetadata.FlowId);
+                enricher.EnrichFlowActionsWithFlowMetadata(flowActions, flowMetadata.Name, flowMetadata.FlowId);
+                
+                
+                actions = flowActions;
+                connectionReferences = flowConnectionReferences;
             }
             else if (node.Tag is FlowActionModel flowAction)
             {
                 actions = new List<FlowActionModel> { flowAction };
+                connectionReferences = new List<ConnectionReferenceModel>();
             }
 
-            dgv_FlowActionList.DataSource = null; // Clear existing
+            dgv_FlowActionList.DataSource = null;
             dgv_FlowActionList.DataSource = actions;
+
+            dgv_ConnectionReferenceList.DataSource = null;
+            SetConnectionReferenceControlColumnConfiguration(connectionReferences);
+            dgv_ConnectionReferenceList.DataSource= connectionReferences;
+        }
+
+        private void SetConnectionReferenceControlColumnConfiguration(List<ConnectionReferenceModel> connectionReferences)
+        {
+            dgv_ConnectionReferenceList.AutoGenerateColumns = false;
+            dgv_ConnectionReferenceList.Columns.Clear();
+
+            dgv_ConnectionReferenceList.Columns.Add(new DataGridViewCheckBoxColumn()
+            {
+                DataPropertyName = "Reassign",
+                HeaderText = "Reassign?"
+            });
+
+            dgv_ConnectionReferenceList.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                ReadOnly = true,
+                DataPropertyName = "DisplayName",
+                HeaderText = "Display Name"
+            });
+            dgv_ConnectionReferenceList.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                ReadOnly = true,
+                DataPropertyName = "Name",
+                HeaderText = "Name"
+            });
+            dgv_ConnectionReferenceList.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                ReadOnly = true,
+                DataPropertyName = "LogicalName",
+                HeaderText = "Logical Name"
+            });
+
+            ownedConnectionReferences = new ConnectionReferenceService(Service).GetConnectionReferencesOwnedByUser();
+
+            var comboColumn = new DataGridViewComboBoxColumn()
+            {
+                DataPropertyName = "ReplacementConnectionReference",
+                HeaderText = "Replacement Connection Reference",
+                Name = "ReplacementConnectionReference",
+                ValueType = typeof(string),
+                DataSource = ownedConnectionReferences,
+                ValueMember = "Name",
+                DisplayMember = "DisplayName"
+            };
+
+            dgv_ConnectionReferenceList.Columns.Add(comboColumn);
+
+            dgv_ConnectionReferenceList.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                ReadOnly = true,
+                DataPropertyName = "ReplacementLogicalName",
+                HeaderText = "Replacement Logical Name"
+            });
+
+            dgv_ConnectionReferenceList.Columns.Add(new DataGridViewCheckBoxColumn()
+            {
+                ReadOnly = true,
+                DataPropertyName = "ValidReassignment",
+                HeaderText = "Valid Reassignment"
+            });
         }
 
 
@@ -376,7 +341,6 @@ namespace SolutionConnectionReferenceReassignment
                         SelectedImageKey = "treeicon_powerautomate.png"
                     };
 
-                    // Add placeholder for lazy loading actions
                     flowNode.Nodes.Add(new TreeNode("Loading..."));
 
                     node.Nodes.Add(flowNode);
@@ -392,7 +356,7 @@ namespace SolutionConnectionReferenceReassignment
 
                 foreach (var action in actions)
                 {
-                    var actionNode = new TreeNode(action.Name)
+                    var actionNode = new TreeNode(action.ActionName)
                     {
                         Tag = action,
                         ImageKey = "treeicon_action.png",
@@ -403,5 +367,36 @@ namespace SolutionConnectionReferenceReassignment
             }
         }
 
+        private void dgv_ConnectionReferenceList_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (dgv_ConnectionReferenceList.Columns[e.ColumnIndex].Name == "ReplacementConnectionReference")
+            {
+                var row = dgv_ConnectionReferenceList.Rows[e.RowIndex];
+                var selectedName = row.Cells["ReplacementConnectionReference"].Value as string;
+
+                if (selectedName != null)
+                {
+                    var match = ownedConnectionReferences.FirstOrDefault(c => c.Name == selectedName);
+                    if (match != null)
+                    {
+                        var boundItem = row.DataBoundItem as ConnectionReferenceModel;
+                        if (boundItem != null)
+                        {
+                            boundItem.ReplacementConnectionReferenceLogicalName = match.LogicalName;
+
+                            dgv_ConnectionReferenceList.Refresh();
+                        }
+                    }
+                }
+            }
+        }
+
+        private void dgv_ConnectionReferenceList_CurrentCellDirtyStateChanged(object sender, EventArgs e)
+        {
+            if (dgv_ConnectionReferenceList.IsCurrentCellDirty)
+            {
+                dgv_ConnectionReferenceList.CommitEdit(DataGridViewDataErrorContexts.Commit);
+            }
+        }
     }
 }
