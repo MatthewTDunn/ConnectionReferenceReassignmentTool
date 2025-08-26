@@ -11,16 +11,16 @@ namespace SolutionConnectionReferenceReassignment.Models
     {
         public string DisplayName { get; set; } // Populated by the Dataverse enrichment function within the orchestrator FlowDefinitionOrchestrator.cs
         public string Name { get; set; }
+
         public string LogicalName { get; set; }
 
-        #region clientData Exclusive Properties
-        public string RuntimeSource { get; set; }
-        #endregion
+        public string RuntimeSource { get; set; } //clientData exclusive property
+
+        public string ConnectorId { get; set; } //correlate with "logicalname" for datagridview row. [make sure users can't pick inappropriate connection reference]
 
         #region XRMToolbox Tool Properties
         public string ReplacementConnectionReference { get; set; }
         public string ReplacementConnectionReferenceLogicalName {  get; set; }
-        public bool AssignmentValid { get; set; }
         #endregion
 
     }
