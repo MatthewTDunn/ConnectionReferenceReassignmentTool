@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Query;
 using SolutionConnectionReferenceReassignment.Models;
 using SolutionConnectionReferenceReassignment.Services;
 using System;
@@ -30,9 +31,9 @@ namespace SolutionConnectionReferenceReassignment.Utilities
             }
         }
 
-        public void EnrichConnectionReferenceDataWithDisplayName(List<ConnectionReferenceModel> connectionReference)
+        public void EnrichConnectionReferenceDataWithDisplayName(List<ConnectionReferenceModel> connectionReferences)
         {
-
+            
         }
     }
 }

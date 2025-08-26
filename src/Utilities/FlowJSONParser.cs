@@ -28,6 +28,12 @@ namespace SolutionConnectionReferenceReassignment.Utilities
                         ActionName = prop.Name,
                         Type = actionObj?["type"]?.ToString() ?? "(unknown)",
                         ConnectionName = actionObj?["inputs"]?["host"]?["connectionName"]?.ToString() ?? "(none)",
+                        // Wwe just want to grab specific path segment for resource instance
+                        ApiIdExtract = (actionObj?["inputs"]?["host"]?["apiId"]?.ToString() ?? string.Empty)
+                            .Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries)
+                            .LastOrDefault() ?? "(none)",
+                        // Use the connectionName associated with the action to grab the relevant connection reference logical name
+                        ConnectionReferenceLogicalName = clientData?["properties"]?["connectionReferences"]?[actionObj?["inputs"]?["host"]?["connectionName"]?.ToString()]?["connection"]?["connectionReferenceLogicalName"]?.ToString() ?? "(none)",
                         OperationId = actionObj?["inputs"]?["host"]?["operationId"]?.ToString() ?? "(none)",
                         Parameters = actionObj?["inputs"]?["parameters"]?.ToString() ?? "(none)"
                     });
@@ -53,7 +59,7 @@ namespace SolutionConnectionReferenceReassignment.Utilities
                 var connectionReferenceItem = prop.Value as JObject;
                 flowConnectionReferenceList.Add(new ConnectionReferenceModel
                 {
-                    Name = prop.Name,
+                    Name = connectionReferenceItem?["api"]?["name"]?.ToString() ?? prop.Name,
                     LogicalName = connectionReferenceItem?["connection"]?["connectionReferenceLogicalName"]?.ToString() ?? "(none)",
                     RuntimeSource = connectionReferenceItem?["runtimeSource"]?.ToString() ?? "(none)"
                 });

@@ -11,10 +11,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace SolutionConnectionReferenceReassignment.Utilities
+using SolutionConnectionReferenceReassignment.Utilities;
+
+namespace SolutionConnectionReferenceReassignment.Orchestrators
 {
     // Thought it may be best to handle this via a helper as both the FlowAction & ConnectionReference service utilise the same workflow.clientdata JSON.
-    // Parse from here to handle once and feed into appropriate services/models.
+    // Load from here to handle once and feed into utility for parsing.
     internal class FlowDefinitionOrchestrator
     {
         private readonly IOrganizationService _service;
