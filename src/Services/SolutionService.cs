@@ -17,6 +17,17 @@ namespace SolutionConnectionReferenceReassignment.Services
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
+        /// <summary>
+        /// Retreives all unmanaged solutions.
+        /// </summary>
+        /// <returns>
+        /// A list of <see cref="SolutionModel"/> objects representing unmanaged solutions, 
+        /// including their unique identifier, friendly name, unique name, and version.
+        /// </returns>
+        /// <remarks>
+        /// Only solutions where <c>ismanaged = false</c> are returned. 
+        /// Results are ordered by the <c>friendlyname</c> attribute in ascending order.
+        /// </remarks>
         public List<SolutionModel> GetUnmanagedSolutions()
         {
             var query = new QueryExpression("solution")

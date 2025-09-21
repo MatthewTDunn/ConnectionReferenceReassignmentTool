@@ -18,10 +18,8 @@ namespace SolutionConnectionReferenceReassignment.Models
 
         public string ConnectorId { get; set; } //correlate with "logicalname" for datagridview row. [make sure users can't pick inappropriate connection reference]
 
-        #region XRMToolbox Tool Properties
-        public string ReplacementConnectionReference { get; set; }
-        public string ReplacementConnectionReferenceLogicalName {  get; set; }
-        #endregion
-
+        public int IndividualFlowCount { get; set; }
+        public int FlowActionCount {  get; set; }
+        
     }
 }

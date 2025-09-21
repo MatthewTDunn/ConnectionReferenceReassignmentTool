@@ -12,11 +12,5 @@ namespace SolutionConnectionReferenceReassignment.Models
         public string FriendlyName { get; set; }
         public string UniqueName { get; set; }
         public string Version { get; set; }
-        public bool IsManaged { get; set; }
-
-        public override string ToString()
-        {
-            return $"{FriendlyName} ({UniqueName} v.{Version})";
-        }
     }
 }

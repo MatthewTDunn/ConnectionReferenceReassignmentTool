@@ -33,9 +33,10 @@ namespace SolutionConnectionReferenceReassignment.Services
         /// </param>
         /// <returns>A list of <see cref="ConnectionReferenceModel"/> available to the user to reassign.</returns>
 
-        public List<ConnectionReferenceModel>GetFilteredConnectionReferences(/*string filterOption*/)
+        public List<ConnectionReferenceModel>GetFilteredConnectionReferences()
         {
             Guid userId = GetCurrentUserId();
+
             var query = new QueryExpression("connectionreference")
             {
                 ColumnSet = new ColumnSet("connectionreferencedisplayname", "connectionreferencelogicalname", "ownerid", "connectorid"),
@@ -71,12 +72,21 @@ namespace SolutionConnectionReferenceReassignment.Services
 
             var results = _service.RetrieveMultiple(query).Entities;
 
-            return results.Select(e => new ConnectionReferenceModel
+            var connectionReferences = results.Select(e => new ConnectionReferenceModel
             {
                 DisplayName = e.GetAttributeValue<string>("connectionreferencedisplayname"),
                 Name = e.GetAttributeValue<string>("connectionreferencelogicalname"),
                 ConnectorId = ExtractConnectorKey(e.GetAttributeValue<string>("connectorid"))
             }).ToList();
+
+            connectionReferences.Insert(0, new ConnectionReferenceModel
+            {
+                DisplayName = string.Empty,
+                Name = string.Empty,
+                ConnectorId = string.Empty
+            });
+
+            return connectionReferences;
         }
 
         /// <summary>
@@ -90,16 +100,19 @@ namespace SolutionConnectionReferenceReassignment.Services
             {
                 var whoAmIRequest = new WhoAmIRequest();
                 var whoAmIResponse = (WhoAmIResponse)_service.Execute(whoAmIRequest);
+
+                // Currently tuple OrganizationId is not utilised, but might be handy later as we can't get it directly from the service
                 return whoAmIResponse.UserId;
+
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Failed to retrieve current user ID.", ex);
+                throw new InvalidOperationException("Failed to retrieve current user details.", ex);
             }
         }
 
         /// <summary>
-        /// Method to parse [connectorid] column of [connectionreference] table to format consistent with tooling model <see cref="ConnectionReferenceModel"/>.
+        /// Method to parse <c>connectorid</c> column of <c>connectionreference</c> table to format consistent with tooling model <see cref="ConnectionReferenceModel"/>.
         /// </summary>
         /// <param name="connectorId">Connector id Power Platform path</param>
         /// <example>/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps ➡️ shared_commondataserviceforapps</example>

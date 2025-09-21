@@ -15,13 +15,12 @@ namespace SolutionConnectionReferenceReassignment.Models
         #endregion
 
         public string ActionName { get; set; }
+        public string OperationMetadataId { get; set; }
         public string ApiIdExtract { get; set; } // default format "/providers/Microsoft.PowerApps/apis/{apiIdExtract}"
         public string ConnectionName { get; set; }
         public string ConnectionReferenceLogicalName { get; set; }
         public string OperationId { get; set; }
-        public string Type {  get; set; }
         public string Parameters { get; set; }
 
-        
     }
 }

@@ -6,15 +6,19 @@ using System.Threading.Tasks;
 
 namespace SolutionConnectionReferenceReassignment.Models
 {
-    internal class FlowMetadataModel
+    internal class FlowModel
     {
+
+        // At a later date, may be appropriate to capture current flow state (eg/ active/inactive) but figured at MVP to exclude this as it is irrelevant to the tooling.
+        //public string Status => GetStatusText();
+        //public string State => GetStateText();
+
         public string Name { get; set; }
         public Guid FlowId { get; set; }
-        public string Status => GetStatusText();
-        public string State => GetStateText();
         public int StateCode {  get; set; }
         public int StatusCode {  get; set; }
 
+        /*
         private string GetStateText()
         {
             switch (StateCode)
@@ -43,6 +47,7 @@ namespace SolutionConnectionReferenceReassignment.Models
                   
             }
         }
+        */
 
     }
 }

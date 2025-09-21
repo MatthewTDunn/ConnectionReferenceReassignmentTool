@@ -26,6 +26,11 @@ namespace SolutionConnectionReferenceReassignment.Orchestrators
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
+        /// <summary>
+        /// Retrieves and deserializes the <c>clientdata</c> JSON.
+        /// </summary>
+        /// <param name="workflowId">The GUID of the workflow to retrieve, as per the record <c>workflowid</c> of Dataverse table <c>workflow</c>.</param>
+        /// <returns>A JSON object representing the workflow's <c>clientdata</c>, or <c>null</c> if the workflow is not found</returns>
         public JObject GetClientData(Guid workflowId)
         {
             var query = new QueryExpression("workflow")
@@ -63,17 +68,28 @@ namespace SolutionConnectionReferenceReassignment.Orchestrators
             }
         }
 
-        public (List<FlowActionModel> Actions, List<ConnectionReferenceModel> ConnectionReferences) GetParsedFlowDefinition(Guid workflowId)
+        /// <summary>
+        /// Parses a workflow's <c>clientdata</c> into <see cref="FlowActionModel"/> and <see cref="ConnectionReferenceModel"/> objects.
+        /// </summary>
+        /// <param name="workflowId">The GUID of the workflow to retrieve, as per the record <c>workflowid</c> of Dataverse table <c>workflow</c>.</param>
+        /// <returns>
+        /// A tuple containing:
+        /// <list type="bullet">
+        /// <item><see cref="List{FlowActionModel}"/> representing all actions in the workflow.</item>
+        /// <item><see cref="List{ConnectionReferenceModel}"/> representing all connection references in the workflow.</item>
+        /// </list>
+        /// Returns empty lists if <c>clientdata</c> is null or invalid.
+        /// </returns>
+        public (List<FlowActionModel> Actions, List<ConnectionReferenceModel> ConnectionReferences, int ErrorCount) GetParsedFlowDefinition(Guid workflowId)
         {
             var clientData = GetClientData(workflowId);
-
             if (clientData == null)
-                return (new List<FlowActionModel>(), new List<ConnectionReferenceModel>());
+                return (new List<FlowActionModel>(), new List<ConnectionReferenceModel>(), 0);
 
-            var actions = FlowJSONParser.ParseFlowActions(clientData);
+            var (actions, actionErrorCount) = FlowJSONParser.ParseFlowActions(clientData);
             var connectionReferences = FlowJSONParser.ParseFlowConnectionReferences(clientData);
 
-            return (actions, connectionReferences);
+            return (actions, connectionReferences, actionErrorCount);
         }
     }
 }

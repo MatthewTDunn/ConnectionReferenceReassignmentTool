@@ -20,17 +20,15 @@ namespace SolutionConnectionReferenceReassignment.Services
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
-        public List<FlowActionModel> ParseActionsFromClientData(JObject clientData)
-        {
-            if (clientData == null)
-                return new List<FlowActionModel>();
-
-            return FlowJSONParser.ParseFlowActions(clientData);
-        }
-
-        public List<FlowActionModel> GetFlowActions(Guid workflowId)
+        /// <summary>
+        /// Retrieves the clientData JSON from Dataverse workflow record and parses it into a list of FlowActionModel objects via the ParseFlowActions utility <see cref="FlowJSONParser"/>
+        /// </summary>
+        /// <param name="workflowId">The GUID of the Power Automate flow <c>workflowid</c> of table <c>workflow</c></param>
+        /// <returns>A list of FlowActionModel objects representing the actions in the flow <see cref="FlowActionModel"/></returns>
+        public (List<FlowActionModel> Actions, int ErrorCount) GetFlowActions(Guid workflowId)
         {
             var actions = new List<FlowActionModel>();
+            int errorCount = 0;
 
             var workflowQuery = new QueryExpression("workflow")
             {
@@ -38,25 +36,23 @@ namespace SolutionConnectionReferenceReassignment.Services
                 Criteria = new FilterExpression
                 {
                     Conditions =
-            {
-                new ConditionExpression("workflowid", ConditionOperator.Equal, workflowId)
-            }
+                    {
+                        new ConditionExpression("workflowid", ConditionOperator.Equal, workflowId)
+                    }
                 }
             };
 
             var workflows = _service.RetrieveMultiple(workflowQuery).Entities;
-
             if (!workflows.Any())
             {
                 MessageBox.Show("Flow not found.");
-                return actions;
+                return (actions, errorCount);
             }
 
             var flow = workflows.First();
             var clientData = flow.GetAttributeValue<string>("clientdata");
-
             if (string.IsNullOrWhiteSpace(clientData))
-                return actions;
+                return (actions, errorCount);
 
             JObject clientDataJson = null;
             try
@@ -66,13 +62,27 @@ namespace SolutionConnectionReferenceReassignment.Services
             catch (JsonException)
             {
                 // TODO: MATT LOG IF NEEDED AT SOME POINT
+                return (actions, errorCount);
             }
 
             if (clientDataJson != null)
             {
-                actions.AddRange(FlowJSONParser.ParseFlowActions(clientDataJson));
+                var (parsedActions, parseErrorCount) = FlowJSONParser.ParseFlowActions(clientDataJson);
+                actions.AddRange(parsedActions);
+                errorCount += parseErrorCount;
             }
 
+            return (actions, errorCount);
+        }
+
+        /// <summary>
+        /// Backward compatibility method that returns only the actions list (for existing code that doesn't need error counts)
+        /// </summary>
+        /// <param name="workflowId">The GUID of the Power Automate flow <c>workflowid</c> of table <c>workflow</c></param>
+        /// <returns>A list of FlowActionModel objects representing the actions in the flow</returns>
+        public List<FlowActionModel> GetFlowActionsOnly(Guid workflowId)
+        {
+            var (actions, _) = GetFlowActions(workflowId);
             return actions;
         }
     }

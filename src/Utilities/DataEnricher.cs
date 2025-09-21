@@ -19,6 +19,12 @@ namespace SolutionConnectionReferenceReassignment.Utilities
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
+        /// <summary>
+        /// Enriches a collection of <see cref="FlowActionModel"/> objects by attaching flow-level metadata.
+        /// </summary>
+        /// <param name="actions">The list of <see cref="FlowActionModel"/> instances to enrich.
+        /// <param name="flowName">The display name of the flow. If <c>null</c> or whitespace, the default value <c>"Unidentified Flow Name"</c> is assigned.</param>
+        /// <param name="flowId">The GUID <c>workflowid</c> from the record on the<c>workflow</c> table</param>
         public void EnrichFlowActionsWithFlowMetadata(List<FlowActionModel> actions, string flowName, Guid flowId)
         {
             if (actions == null) 
@@ -26,14 +32,11 @@ namespace SolutionConnectionReferenceReassignment.Utilities
 
             foreach (var action in actions)
             {
-                action.FlowName = string.IsNullOrWhiteSpace(flowName) ? "Unidentified Flow Name": flowName;
+                action.FlowName = string.IsNullOrWhiteSpace(flowName) 
+                    ? "Unidentified Flow Name"
+                    : flowName;
                 action.FlowId = flowId;
             }
-        }
-
-        public void EnrichConnectionReferenceDataWithDisplayName(List<ConnectionReferenceModel> connectionReferences)
-        {
-            
         }
     }
 }

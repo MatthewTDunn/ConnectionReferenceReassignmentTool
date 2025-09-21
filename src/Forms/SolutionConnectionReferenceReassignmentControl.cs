@@ -3,29 +3,22 @@ using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using SolutionConnectionReferenceReassignment.Models;
 using SolutionConnectionReferenceReassignment.Services;
-using SolutionConnectionReferenceReassignment.Utilities;
 using SolutionConnectionReferenceReassignment.Orchestrators;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Web.Services.Description;
+using System.Text;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
-using NuGet.Protocol.Plugins;
-using System.DirectoryServices.AccountManagement;
-using System.Security.Cryptography.Xml;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json; // MATT TO REMOVE AT SOME POINT - LOGIC SHOULDN'T EXIST IN FORM
 
 namespace SolutionConnectionReferenceReassignment
 {
     public partial class SolutionConnectionReferenceReassignmentControl : PluginControlBase
     {
         private Settings mySettings;
-        private List<ConnectionReferenceModel> ownedConnectionReferences = new List<ConnectionReferenceModel>();
         private List<ConnectionReferenceModel> filteredConnectionReferences = new List<ConnectionReferenceModel>();
-
 
         public SolutionConnectionReferenceReassignmentControl()
         {
@@ -33,21 +26,74 @@ namespace SolutionConnectionReferenceReassignment
             
             // Event subscriber list
             tree_SolutionFlowExplorer.BeforeExpand += tree_SolutionFlowExplorer_BeforeExpand;
-            dgv_ConnectionReferenceList.CellFormatting += dgv_ConnectionReferenceList_CellFormatting;
-            dgv_ConnectionReferenceList.EditingControlShowing += dgv_ConnectionReferenceList_EditingControlShowing; // New connection reference colour
+            tree_SolutionFlowExplorer.DrawMode = TreeViewDrawMode.OwnerDrawText;
+            tree_SolutionFlowExplorer.DrawNode += Tree_SolutionFlowExplorer_DrawNode;
+        }
 
+        private void Tree_SolutionFlowExplorer_DrawNode(object sender, DrawTreeNodeEventArgs e)
+        {
+            if (e.Node == null) return;
 
+            TreeView tree = sender as TreeView;
+            bool isSelected = (e.State & TreeNodeStates.Selected) != 0;
+
+            // Determine background and text color
+            Color backColor;
+            Color foreColor;
+            Font nodeFont = e.Node.NodeFont ?? tree.Font;
+
+            if (isSelected)
+            {
+                // If the tree has focus, use normal highlight
+                if (tree.Focused)
+                {
+                    backColor = SystemColors.Highlight;
+                    foreColor = SystemColors.HighlightText;
+                }
+                else
+                {
+                    // Dim highlight when tree loses focus
+                    backColor = SystemColors.Control;
+                    foreColor = SystemColors.ControlText;
+                }
+
+                // Make the selected node bold regardless of focus
+                nodeFont = new Font(nodeFont, FontStyle.Bold);
+            }
+            else
+            {
+                backColor = tree.BackColor;
+                foreColor = tree.ForeColor;
+            }
+
+            // Draw background
+            using (SolidBrush brush = new SolidBrush(backColor))
+            {
+                e.Graphics.FillRectangle(brush, e.Bounds);
+            }
+
+            // Draw text
+            TextRenderer.DrawText(e.Graphics, e.Node.Text, nodeFont, e.Bounds, foreColor, TextFormatFlags.VerticalCenter);
+
+            // If node is focused, draw focus rectangle
+            if ((e.State & TreeNodeStates.Focused) != 0)
+            {
+                ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
+            }
+
+            // Dispose font if created dynamically
+            if (nodeFont != e.Node.NodeFont && nodeFont != tree.Font)
+            {
+                nodeFont.Dispose();
+            }
         }
 
         private void MyPluginControl_Load(object sender, EventArgs e)
         {
-            ShowInfoNotification("This is a notification that can lead to XrmToolBox repository", new Uri("https://github.com/MscrmTools/XrmToolBox"));
-
             // Loads or creates the settings for the plugin
             if (!SettingsManager.Instance.TryLoad(GetType(), out mySettings))
             {
                 mySettings = new Settings();
-
                 LogWarning("Settings not found => a new settings file has been created!");
             }
             else
@@ -55,25 +101,44 @@ namespace SolutionConnectionReferenceReassignment
                 LogInfo("Settings found and loaded");
             }
 
-            SetupConnectionReferenceFilterCombo(); // Looking to setup appropriate defaults
-        }
-        private void SetupConnectionReferenceFilterCombo()
-        {
-            cmb_ConnectionReferenceFilter.DropDownStyle = ComboBoxStyle.DropDownList;
 
-            cmb_ConnectionReferenceFilter.Items.Clear();
-            cmb_ConnectionReferenceFilter.Items.AddRange(new string[]
+
+            // Disable dependent controls until connected
+            ToggleMainControls(false);
+            if (Service == null)
             {
-                "My Connection References",
-                "All User Connection References",
-                "Service Principal Connections",
-                "All References (User + Service Principal)"
-            });
+                MessageBox.Show("Please connect to an environment first.", "No Connection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
-            if (cmb_ConnectionReferenceFilter.Items.Count > 0)
-                cmb_ConnectionReferenceFilter.SelectedIndex = 0;
+            SetupTool();
         }
 
+
+        private void ToggleMainControls(bool state)
+        {
+            tree_SolutionFlowExplorer.Enabled = state;
+            //cmb_ConnectionReferenceFilter.Enabled = state;
+            dgv_ConnectionReferenceList.Enabled = state;
+        }
+
+        private void ToggleButtons(bool state, object nodeTag)
+        {
+            btn_exportcurrentclientdata.Enabled = state;
+            btn_ImpactSummary.Enabled = state;
+            btn_executeflowclientdataupdate.Enabled = state;
+
+            // Only enable the button to open the solution if we're on a solution node.
+            btn_OpenSolution.Enabled = (nodeTag is SolutionModel) ? true : false;
+        }
+
+        // I originally hoped that we could reassign to any available connection references but platform limitations only allow reassignment at the user level. 
+
+
+
+        // NEED TO USE THIS
+        
+        
 
         private void tsbClose_Click(object sender, EventArgs e)
         {
@@ -105,6 +170,12 @@ namespace SolutionConnectionReferenceReassignment
                 mySettings.LastUsedOrganizationWebappUrl = detail.WebApplicationUrl;
                 LogInfo("Connection has changed to: {0}", detail.WebApplicationUrl);
             }
+
+            if (Service != null)
+            {
+                SetupTool();
+            }
+
         }
 
 
@@ -118,26 +189,6 @@ namespace SolutionConnectionReferenceReassignment
             
         }
 
-        private void dgv_ConnectionReferenceList_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-        {
-            var grid = sender as DataGridView;
-
-            if (grid.Columns[e.ColumnIndex].Name == "ReplacementConnectionReference")
-            {
-                var row = grid.Rows[e.RowIndex];
-                bool reassignChecked = Convert.ToBoolean(row.Cells["Reassign"].Value ?? false);
-
-                if (reassignChecked)
-                {
-                    e.CellStyle.BackColor = Color.White; // cell background when editable
-                }
-                else
-                {
-                    e.CellStyle.BackColor = Color.LightGray; // cell background when locked
-                }
-            }
-        }
-
         private void dgv_ConnectionReferenceList_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
         {
             // Only operate when the ReplacementConnectionReference column is editing
@@ -148,8 +199,6 @@ namespace SolutionConnectionReferenceReassignment
             {
                 // color the editing control to match Reassign state
                 var row = dgv_ConnectionReferenceList.CurrentRow;
-                bool reassignChecked = Convert.ToBoolean(row?.Cells["Reassign"].Value ?? false);
-                combo.BackColor = reassignChecked ? Color.White : Color.LightGray;
 
                 // avoid double-subscribe
                 combo.SelectedIndexChanged -= ReplacementCombo_SelectedIndexChanged;
@@ -163,16 +212,6 @@ namespace SolutionConnectionReferenceReassignment
             // current row being edited
             var row = dgv_ConnectionReferenceList.CurrentRow;
             if (row == null) return;
-
-            // Only populate if Reassign is checked for this row
-            bool reassignChecked = Convert.ToBoolean(row.Cells["Reassign"].Value ?? false);
-            if (!reassignChecked)
-            {
-                // if not allowed to change, make sure fields are blanked
-                row.Cells["ReplacementLogicalName"].Value = "";
-                row.Cells["ConnectionType"].Value = "";
-                return;
-            }
 
             // Try to get the selected ConnectionReferenceModel object
             ConnectionReferenceModel selectedRef = null;
@@ -197,12 +236,10 @@ namespace SolutionConnectionReferenceReassignment
             {
                 row.Cells["ReplacementLogicalName"].Value = selectedRef.Name;        // connectionreferencelogicalname
                 //TODO: REPLACE THIS WITH STANDARD VS SERVICE PRINCIPAL LOGIC
-                row.Cells["ConnectionType"].Value = "Standard" ?? selectedRef.ConnectorId;
             }
             else
             {
                 row.Cells["ReplacementLogicalName"].Value = "";
-                row.Cells["ConnectionType"].Value = "";
             }
         }
 
@@ -233,11 +270,46 @@ namespace SolutionConnectionReferenceReassignment
 
         }
 
-        private void tsb_RefreshSolutionList_Click(object sender, EventArgs e)
+        private void SetupTool()
+        {
+            if (Service != null)
+            {
+                EstablishEnvironmentComponentTreeView();
+                EstablishConnectionReferenceFilter();
+                ToggleMainControls(true);
+                dgv_FlowActionList.DataSource = null;
+                dgv_ConnectionReferenceList.DataSource = null;
+                dgv_ConnectionReferenceList.Columns.Clear(); // Because these are manually added, the configuration persists - so we need to manually remove
+            } 
+            else
+            {
+                ToggleMainControls(false);
+                MessageBox.Show("Please connect to an environment first.",
+                "No Connection",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+                return;
+            }
+        }
+
+        private void EstablishConnectionReferenceFilter()
+        {
+            var comboColumn = dgv_ConnectionReferenceList.Columns["ReplacementConnectionReference"] as DataGridViewComboBoxColumn;
+            if (comboColumn != null)
+            {
+                comboColumn.DataSource = filteredConnectionReferences;
+            }
+        }
+
+
+        private void EstablishEnvironmentComponentTreeView()
         {
             if (Service == null)
             {
-                MessageBox.Show("Please connect to an environment first.", "No Connection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please connect to an environment first.",
+                                "No Connection",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning);
                 return;
             }
 
@@ -267,42 +339,63 @@ namespace SolutionConnectionReferenceReassignment
                     {
                         ImageKey = "treeicon_environment.png",
                         SelectedImageKey = "treeicon_environment.png"
-                    }; 
+                    };
                     foreach (var solution in solutions)
                     {
                         var solutionNode = new TreeNode(solution.FriendlyName)
                         {
-                            Tag = solution, 
+                            Tag = solution,
                             ImageKey = "treeicon_solution.png",
                             SelectedImageKey = "treeicon_solution.png"
                         };
 
                         solutionNode.Nodes.Add(new TreeNode("Loading..."));
-
                         environmentNode.Nodes.Add(solutionNode);
                     }
 
                     tree_SolutionFlowExplorer.Nodes.Add(environmentNode);
                     environmentNode.Expand();
-
                     tree_SolutionFlowExplorer.EndUpdate();
                 }
             });
         }
 
-
-        private void cmb_ConnectionReferenceFilter_SelectedIndexChanged(object sender, EventArgs e)
+        private void tsb_RefreshSolutionList_Click(object sender, EventArgs e)
         {
-            string filterOption = cmb_ConnectionReferenceFilter.SelectedItem?.ToString() ?? "My Connection References";
-            filteredConnectionReferences = new ConnectionReferenceService(Service).GetFilteredConnectionReferences(/*filterOption*/);
-
-            // Update the DataGridView ComboBox column
-            var comboColumn = dgv_ConnectionReferenceList.Columns["ReplacementConnectionReference"] as DataGridViewComboBoxColumn;
-            if (comboColumn != null)
-            {
-                comboColumn.DataSource = filteredConnectionReferences;
-            }
+            SetupTool();
         }
+
+
+        //private void cmb_ConnectionReferenceFilter_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    string filterOption = cmb_ConnectionReferenceFilter.SelectedItem?.ToString() ?? "My Connection References";
+        //    filteredConnectionReferences = new ConnectionReferenceService(Service).GetFilteredConnectionReferences(/*filterOption*/);
+
+        //    // Update the DataGridView ComboBox column
+        //    var comboColumn = dgv_ConnectionReferenceList.Columns["ReplacementConnectionReference"] as DataGridViewComboBoxColumn;
+        //    if (comboColumn != null)
+        //    {
+        //        comboColumn.DataSource = filteredConnectionReferences;
+        //    }
+        //}
+
+
+        //private void SetupConnectionReferenceFilterCombo()
+        //{
+
+        //    cmb_ConnectionReferenceFilter.DropDownStyle = ComboBoxStyle.DropDownList;
+
+        //    cmb_ConnectionReferenceFilter.Items.Clear();
+        //    cmb_ConnectionReferenceFilter.Items.AddRange(new string[]
+        //    {
+        //        "My Connection References",
+        //        "All Connection References",
+        //    });
+
+        //    if (cmb_ConnectionReferenceFilter.Items.Count > 0)
+        //        cmb_ConnectionReferenceFilter.SelectedIndex = 0;
+
+        //}
 
         private void cmb_SolutionList_Click(object sender, EventArgs e)
         {
@@ -319,6 +412,15 @@ namespace SolutionConnectionReferenceReassignment
             var node = e.Node;
             if (node == null) return;
 
+            if (e.Node?.Tag is FlowActionModel)
+            {
+                MessageBox.Show(
+                    "Due to the way Flow clientData is structured, it is advised to avoid programmatically updating connection references on an action-by-action basis with this tool. Instead, please update connection references directly through the Power Automate UI.",
+                    "Notice",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
 
             WorkAsync(new WorkAsyncInfo
             {
@@ -342,89 +444,204 @@ namespace SolutionConnectionReferenceReassignment
                     dgv_FlowActionList.DataSource = null;
                     dgv_FlowActionList.DataSource = actions;
 
-                    dgv_ConnectionReferenceList.DataSource = null;
-                    // How does the user want to filter the connection references
-                    string filterOption = cmb_ConnectionReferenceFilter.SelectedItem?.ToString() ?? "My Connection References";
-                    SetConnectionReferenceControlColumnConfiguration(uniqueReferences, filterOption);
+                    dgv_ConnectionReferenceList.DataSource = null;                    
+                    SetConnectionReferenceControlColumnConfiguration(uniqueReferences);
 
-                    dgv_ConnectionReferenceList.DataSource = uniqueReferences;
+                    // We don't want users using this tool to update flows on an action-by-action basis so only populate connection reference list if not selecting an action.
+                    if (e.Node?.Tag is FlowActionModel)
+                    {
+                        dgv_ConnectionReferenceList.DataSource = null;
+                        dgv_ConnectionReferenceList.Enabled = false;
+                    } else
+                    {
+                        dgv_ConnectionReferenceList.DataSource = uniqueReferences;
+                        dgv_ConnectionReferenceList.Enabled = true;
+                    }
+                        
+                    ToggleButtons(true, e.Node?.Tag);
+                    UpdateFlowActionCounts();
+                    UpdateIndividualFlowCounts();
 
+
+                    //MATT TODO: HANDLE MORE APPROPRIATELY.
+                    filteredConnectionReferences = new ConnectionReferenceService(Service).GetFilteredConnectionReferences(/*filterOption*/);
+                    var comboColumn = dgv_ConnectionReferenceList.Columns["ReplacementConnectionReference"] as DataGridViewComboBoxColumn;
+                    if (comboColumn != null)
+                    {
+                        comboColumn.DataSource = filteredConnectionReferences;
+                    }
 
                     //Here we need to iterate over each row entry to align it with the logicalname of the connectionreference to be replaced
                     foreach (DataGridViewRow row in dgv_ConnectionReferenceList.Rows)
-                    {
-                        if (row.DataBoundItem is ConnectionReferenceModel rowData)
                         {
-                            string nameToMatch = rowData.Name;
+                            if (row.DataBoundItem is ConnectionReferenceModel rowData)
+                            {
+                                string nameToMatch = rowData.Name;
 
-                            var filtered = filteredConnectionReferences
-                                .Where(x => x.ConnectorId.Equals(nameToMatch, StringComparison.OrdinalIgnoreCase))
-                                .ToList();
+                                var filtered = filteredConnectionReferences
+                                    .Where(x => x.ConnectorId.Equals(nameToMatch, StringComparison.OrdinalIgnoreCase)
+                                    || string.IsNullOrEmpty(x.ConnectorId)) // This ensures an empty option is always included (for no update on particular connection reference)
+                                    .ToList();
 
                             var comboCell = new DataGridViewComboBoxCell
-                            {
-                                DataSource = filtered,
-                                ValueMember = null,           // not needed when storing the object
-                                DisplayMember = "DisplayName",
-                                Value = null                  // initially no selection
-                            };
+                                {
+                                    DataSource = filtered,
+                                    ValueMember = null,
+                                    DisplayMember = "DisplayName",
+                                    Value = null
+                                };
 
-                            row.Cells["ReplacementConnectionReference"] = comboCell;
+                                row.Cells["ReplacementConnectionReference"] = comboCell;
+                            }
                         }
-                    }
 
 
                 }
             });
         }
 
-        private void SetConnectionReferenceControlColumnConfiguration(List<ConnectionReferenceModel> connectionReferences, string filterOption)
+        private void UpdateIndividualFlowCounts()
+        {
+            if (dgv_ConnectionReferenceList.DataSource is List<ConnectionReferenceModel> connectionReferences)
+            {
+                // Dictionary to hold unique FlowIds per ConnectionReferenceLogicalName
+                var flowIdSets = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (DataGridViewRow flowRow in dgv_FlowActionList.Rows)
+                {
+                    if (flowRow.IsNewRow) continue;
+
+                    var logicalName = flowRow.Cells["ConnectionReferenceLogicalName"]?.Value?.ToString();
+                    var flowId = flowRow.Cells["FlowId"]?.Value?.ToString();
+
+                    if (string.IsNullOrWhiteSpace(logicalName) || string.IsNullOrWhiteSpace(flowId))
+                        continue;
+
+                    if (!flowIdSets.ContainsKey(logicalName))
+                        flowIdSets[logicalName] = new HashSet<string>();
+
+                    flowIdSets[logicalName].Add(flowId); // ensures uniqueness
+                }
+
+                // Map counts back to the ConnectionReferenceModel
+                foreach (var connRef in connectionReferences)
+                {
+                    if (flowIdSets.TryGetValue(connRef.LogicalName, out var flowIds))
+                    {
+                        connRef.IndividualFlowCount = flowIds.Count;
+                    }
+                    else
+                    {
+                        connRef.IndividualFlowCount = 0;
+                    }
+                }
+
+                dgv_ConnectionReferenceList.Refresh();
+            }
+        }
+
+
+        private void UpdateFlowActionCounts()
+        {
+            if (dgv_ConnectionReferenceList.DataSource is List<ConnectionReferenceModel> connectionReferences)
+            {
+                // Precompute counts using a dictionary for performance
+                var flowCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (DataGridViewRow flowRow in dgv_FlowActionList.Rows)
+                {
+                    if (flowRow.IsNewRow) continue;
+
+                    var logicalName = flowRow.Cells["ConnectionReferenceLogicalName"]?.Value?.ToString();
+                    if (string.IsNullOrWhiteSpace(logicalName)) continue;
+
+                    if (!flowCounts.ContainsKey(logicalName))
+                        flowCounts[logicalName] = 0;
+
+                    flowCounts[logicalName]++;
+                }
+
+                // Update each ConnectionReferenceModel
+                foreach (var connRef in connectionReferences)
+                {
+                    flowCounts.TryGetValue(connRef.LogicalName, out int count);
+                    connRef.FlowActionCount = count;
+                }
+
+                dgv_ConnectionReferenceList.Refresh();
+            }
+        }
+
+        private void SetConnectionReferenceControlColumnConfiguration(List<ConnectionReferenceModel> connectionReferences)
         {
             dgv_ConnectionReferenceList.AutoGenerateColumns = false;
             dgv_ConnectionReferenceList.Columns.Clear();
-
-            dgv_ConnectionReferenceList.Columns.Add(new DataGridViewCheckBoxColumn()
-            {
-                DataPropertyName = "Reassign",
-                HeaderText = "Reassign?",
-                Name = "Reassign",
-
-            });
-
-            dgv_ConnectionReferenceList.Columns["Reassign"].DefaultCellStyle.BackColor = Color.White;
 
             dgv_ConnectionReferenceList.Columns.Add(new DataGridViewTextBoxColumn()
             {
                 ReadOnly = true,
                 DataPropertyName = "Name",
-                HeaderText = "Name",
-                Name = "Name"
+                HeaderText = "Connection Type",
+                Name = "Name",
+
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                FillWeight = 20
             });
             dgv_ConnectionReferenceList.Columns.Add(new DataGridViewTextBoxColumn()
             {
                 ReadOnly = true,
                 DataPropertyName = "LogicalName",
                 HeaderText = "Logical Name",
-                Name = "LogicalName"
+                Name = "LogicalName",
+
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                FillWeight = 20
+            });
+
+            dgv_ConnectionReferenceList.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                ReadOnly = true,
+                DataPropertyName = "IndividualFlowCount",
+                HeaderText = "Impacted Flow Count",
+                Name = "IndividualFlowCount",
+
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                FillWeight = 10
+            });
+
+            dgv_ConnectionReferenceList.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                ReadOnly = true,
+                DataPropertyName = "FlowActionCount",
+                HeaderText = "Flow Action Count",
+                Name = "FlowActionCount",
+
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                FillWeight = 10
             });
 
             var filteredConnectionReferences = new ConnectionReferenceService(Service)
-                .GetFilteredConnectionReferences(/*filterOption*/);
+                .GetFilteredConnectionReferences();
 
             var comboColumn = new DataGridViewComboBoxColumn()
             {
-                ReadOnly = true,
+                ReadOnly = false,
                 DataPropertyName = "ReplacementConnectionReference",
                 Name = "ReplacementConnectionReference",
                 HeaderText = "Replacement Connection Reference",
-                ValueMember = "Name",           // what gets stored in the cell
-                DisplayMember = "DisplayName",  // what the user sees
+                ValueMember = "Name",
+                DisplayMember = "DisplayName",
                 DataSource = filteredConnectionReferences, 
                 DefaultCellStyle = new DataGridViewCellStyle()
                 {
-                    BackColor = Color.LightGray // default background color
-                }
+                    BackColor = Color.White
+                },
+
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                FillWeight = 20
             };
+
+
 
             dgv_ConnectionReferenceList.Columns.Add(comboColumn);
 
@@ -433,14 +650,10 @@ namespace SolutionConnectionReferenceReassignment
                 ReadOnly = true,
                 DataPropertyName = "ReplacementLogicalName",
                 Name = "ReplacementLogicalName",
-                HeaderText = "Replacement Logical Name"
-            });
-            dgv_ConnectionReferenceList.Columns.Add(new DataGridViewTextBoxColumn()
-            {
-                ReadOnly = true,
-                DataPropertyName = "ConnectionType",
-                Name = "ConnectionType",
-                HeaderText = "Connection Type"
+                HeaderText = "Replacement Logical Name",
+
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                FillWeight = 20
             });
         }
 
@@ -454,10 +667,8 @@ namespace SolutionConnectionReferenceReassignment
                 node.Nodes.Count == 1 && node.Nodes[0].Text == "Loading...")
             {
                 node.Nodes.Clear();
-
-                var flowService = new FlowMetadataService(Service);
+                var flowService = new FlowService(Service);
                 var flows = flowService.GetFlowsInSolution(solution.SolutionId);
-
                 foreach (var flow in flows)
                 {
                     var flowNode = new TreeNode(flow.Name)
@@ -466,19 +677,17 @@ namespace SolutionConnectionReferenceReassignment
                         ImageKey = "treeicon_powerautomate.png",
                         SelectedImageKey = "treeicon_powerautomate.png"
                     };
-
                     flowNode.Nodes.Add(new TreeNode("Loading..."));
-
                     node.Nodes.Add(flowNode);
                 }
             }
-            else if (node.Tag is FlowMetadataModel flowMetadata &&
+            else if (node.Tag is FlowModel flowMetadata &&
                      node.Nodes.Count == 1 && node.Nodes[0].Text == "Loading...")
             {
                 node.Nodes.Clear();
-
                 var actionService = new FlowActionService(Service);
-                var actions = actionService.GetFlowActions(flowMetadata.FlowId);
+                // Use the backward compatibility method to avoid handling error counts here
+                var actions = actionService.GetFlowActionsOnly(flowMetadata.FlowId);
 
                 foreach (var action in actions)
                 {
@@ -496,54 +705,37 @@ namespace SolutionConnectionReferenceReassignment
         private void dgv_ConnectionReferenceList_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
-
             var grid = sender as DataGridView;
             var row = grid.Rows[e.RowIndex];
 
-            // --- Handle Reassign checkbox toggle ---
-            if (grid.Columns[e.ColumnIndex].Name == "Reassign")
-            {
-                bool reassignChecked = Convert.ToBoolean(row.Cells["Reassign"].Value);
-
-                var comboCell = row.Cells["ReplacementConnectionReference"] as DataGridViewComboBoxCell;
-
-                if (reassignChecked)
-                {
-                    comboCell.ReadOnly = false;
-                    comboCell.Style.BackColor = Color.White;
-                }
-                else
-                {
-                    comboCell.ReadOnly = true;
-                    comboCell.Style.BackColor = Color.LightGray;
-                    row.Cells["ReplacementLogicalName"].Value = null; // reset logical name
-                    comboCell.Value = null; // reset combo selection
-                }
-            }
-
-            // --- Handle ReplacementConnectionReference selection ---
             if (grid.Columns[e.ColumnIndex].Name == "ReplacementConnectionReference")
             {
                 var comboCell = row.Cells["ReplacementConnectionReference"] as DataGridViewComboBoxCell;
+
                 if (comboCell?.Value != null)
                 {
-                    string selectedName = comboCell.Value.ToString(); // this is the logical name stored in ValueMember
-                    var selectedRef = filteredConnectionReferences.FirstOrDefault(r => r.Name == selectedName);
+                    string selectedValue = comboCell.Value.ToString();
+
+                    // Search by DisplayName since that's what the combo box is actually returning
+                    var selectedRef = filteredConnectionReferences.FirstOrDefault(r => r.DisplayName == selectedValue);
+
                     if (selectedRef != null)
                     {
-                        row.Cells["ReplacementLogicalName"].Value = selectedRef.Name;
-                        row.Cells["ConnectionType"].Value = "Standard";
+                        row.Cells["ReplacementLogicalName"].Value = selectedRef.Name; // or selectedRef.LogicalName if you want the logical name
+                    }
+                    else
+                    {
+                        row.Cells["ReplacementLogicalName"].Value = "";
                     }
                 }
                 else
                 {
-                    // If nothing is selected, clear the fields
                     row.Cells["ReplacementLogicalName"].Value = "";
-                    row.Cells["ConnectionType"].Value = "";
                 }
             }
-
         }
+
+
 
 
         // to ensure that the logical name of the replacement connection reference is immediately populated when the user clicks
@@ -567,6 +759,284 @@ namespace SolutionConnectionReferenceReassignment
 
         private void btn_executeflowclientdataupdate_Click(object sender, EventArgs e)
         {
+            // Step 1: Validate UI inputs
+            if (!ValidateGridInputs())
+                return;
+
+            // Step 2: Build update parameters from UI
+            var updateParams = BuildUpdateParameters();
+
+            if (updateParams == null || updateParams.AffectedFlows.Count == 0)
+            {
+                MessageBox.Show("No flows to update based on selected criteria.",
+                    "No Updates", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            // Step 3: Show confirmation dialog
+            if (!ShowUpdateConfirmation(updateParams))
+                return;
+
+            // Step 4: Execute the update asynchronously
+            ExecuteFlowUpdates(updateParams);
+        }
+
+        /// <summary>
+        /// Validates that all required fields are populated in the grid
+        /// </summary>
+        /// <summary>
+        /// Validates that all required fields are populated in the grid
+        /// </summary>
+        private bool ValidateGridInputs()
+        {
+            foreach (DataGridViewRow row in dgv_ConnectionReferenceList.Rows)
+            {
+                if (!row.IsNewRow)
+                {
+                    var replacementLogical = row.Cells["ReplacementLogicalName"].Value?.ToString();
+
+                    // If ReplacementLogicalName has a value, validate that ReplacementConnectionReference is also populated
+                    if (!string.IsNullOrWhiteSpace(replacementLogical))
+                    {
+                        var replacementRef = row.Cells["ReplacementConnectionReference"].Value?.ToString();
+
+                        if (string.IsNullOrWhiteSpace(replacementRef))
+                        {
+                            MessageBox.Show(
+                                "One or more connection references with replacement logical names are missing required replacement connection reference values.\n\n" +
+                                "Please ensure that both Replacement Connection Reference and Replacement Logical Name are populated.\n\n" +
+                                "Occasionally, the comboBox in the 'Replacement Connection Reference' column may not register correctly and may need to be reselected if this error persists.",
+                                "Validation Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error
+                            );
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Builds the update parameters from the UI grids
+        /// </summary>
+        private FlowUpdateParameters BuildUpdateParameters()
+        {
+            var parameters = new FlowUpdateParameters();
+
+            // Build connection mapping from ConnectionReferenceList grid
+            BuildConnectionMapping(parameters);
+
+            if (parameters.ConnectionMap.Count == 0)
+                return null;
+
+            // Gather affected flows and operation IDs from FlowActionList grid
+            GatherAffectedFlowsAndOperations(parameters);
+
+            return parameters;
+        }
+
+        /// <summary>
+        /// Builds the connection mapping from the UI grid
+        /// </summary>
+        /// <summary>
+        /// Builds the connection mapping from the UI grid
+        /// </summary>
+        private void BuildConnectionMapping(FlowUpdateParameters parameters)
+        {
+            foreach (DataGridViewRow row in dgv_ConnectionReferenceList.Rows)
+            {
+                if (row.IsNewRow) continue;
+
+                var existingLogical = row.Cells["LogicalName"].Value?.ToString()?.Trim();
+                var replacementLogical = row.Cells["ReplacementLogicalName"].Value?.ToString()?.Trim();
+
+                // Only process rows that have a replacement logical name (non-empty means user wants to update)
+                if (!string.IsNullOrWhiteSpace(existingLogical) && !string.IsNullOrWhiteSpace(replacementLogical))
+                {
+                    if (!parameters.ConnectionMap.ContainsKey(existingLogical))
+                        parameters.ConnectionMap[existingLogical] = replacementLogical;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gathers affected flows and operation IDs from the action grid
+        /// </summary>
+        private void GatherAffectedFlowsAndOperations(FlowUpdateParameters parameters)
+        {
+            foreach (DataGridViewRow row in dgv_FlowActionList.Rows)
+            {
+                if (row.IsNewRow) continue;
+
+                var flowIdObj = row.Cells["FlowId"]?.Value;
+                if (flowIdObj == null) continue;
+
+                string flowId = flowIdObj.ToString()?.Trim();
+                if (string.IsNullOrWhiteSpace(flowId)) continue;
+
+                // Get operation metadata ID
+                var operationId = row.Cells["OperationMetadataId"]?.Value?.ToString();
+                if (!string.IsNullOrWhiteSpace(operationId))
+                    parameters.OperationIdsForWork.Add(operationId);
+
+                // Check if this flow is affected based on ConnectionReferenceLogicalName
+                string actionLogical = row.Cells["ConnectionReferenceLogicalName"]?.Value?.ToString()?.Trim();
+                if (string.IsNullOrWhiteSpace(actionLogical)) continue;
+
+                if (parameters.ConnectionMap.ContainsKey(actionLogical))
+                {
+                    parameters.AffectedFlows.Add(flowId);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Shows confirmation dialog with update statistics
+        /// </summary>
+        private bool ShowUpdateConfirmation(FlowUpdateParameters parameters)
+        {
+            int affectedActionCount = CountAffectedActions(parameters);
+
+            string message = $"You are looking to update {parameters.ConnectionMap.Count} unique connection reference(s) " +
+                             $"across {parameters.AffectedFlows.Count} unique flow(s) " +
+                             $"(total potential impacted actions: {affectedActionCount}) - are you sure you wish to proceed?";
+
+            return MessageBox.Show(message, "Confirm Update", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes;
+        }
+
+        /// <summary>
+        /// Counts the number of affected actions for the confirmation message
+        /// </summary>
+        private int CountAffectedActions(FlowUpdateParameters parameters)
+        {
+            int count = 0;
+            foreach (DataGridViewRow row in dgv_FlowActionList.Rows)
+            {
+                if (row.IsNewRow) continue;
+
+                string actionLogical = row.Cells["ConnectionReferenceLogicalName"]?.Value?.ToString()?.Trim();
+                if (string.IsNullOrWhiteSpace(actionLogical)) continue;
+
+                if (parameters.ConnectionMap.ContainsKey(actionLogical))
+                    count++;
+            }
+            return count;
+        }
+
+        /// <summary>
+        /// Executes the flow updates asynchronously using the service
+        /// </summary>
+        private void ExecuteFlowUpdates(FlowUpdateParameters parameters)
+        {
+            WorkAsync(new WorkAsyncInfo
+            {
+                Message = "Updating flow connection references...",
+                Work = (worker, args) =>
+                {
+                    // Create the service and perform updates
+                    var updateService = new FlowConnectionReferenceUpdateService(Service);
+                    var result = updateService.UpdateFlowConnectionReferences(parameters);
+                    args.Result = result;
+                },
+                PostWorkCallBack = (args) =>
+                {
+                    if (args.Error != null)
+                    {
+                        MessageBox.Show($"Error: {args.Error.Message}", "Error",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    var result = args.Result as FlowUpdateResult;
+                    if (result != null)
+                    {
+                        ShowUpdateResults(result);
+                    }
+                    else
+                    {
+                        MessageBox.Show("No flows updated.", "Update Complete",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            });
+        }
+
+        /// <summary>
+        /// Displays the update results to the user
+        /// </summary>
+        private void ShowUpdateResults(FlowUpdateResult result)
+        {
+            if (result.PerFlowMessages != null && result.PerFlowMessages.Count > 0)
+            {
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("Update Summary:");
+                sb.AppendLine($"- Processed Flows: {result.ProcessedFlows}");
+                sb.AppendLine($"- Successful Updates: {result.SuccessfulFlows}");
+                sb.AppendLine($"- Total Connection References Changed: {result.TotalConnectionRefsChanged}");
+                sb.AppendLine($"- Total Actions Updated: {result.TotalActionsUpdated}");
+                sb.AppendLine();
+                sb.AppendLine("Detailed Results:");
+
+                foreach (var message in result.PerFlowMessages)
+                {
+                    sb.AppendLine(message);
+                }
+                // ------
+                // Ask user if they want to generate a report
+                var dialogResult = MessageBox.Show(
+                    sb.ToString() + "\n\nWould you like to generate a PDF report of the changes?",
+                    "Update Complete",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Information);
+
+                if (dialogResult == DialogResult.Yes)
+                {
+                    // GenerateUpdateReport();
+                }
+
+                // -------
+
+                MessageBox.Show(sb.ToString(), "Update Complete",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("No flows updated.", "Update Complete",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        /*
+        private void GenerateUpdateReport()
+        {
+            try
+            {
+                var reportService = new UpdateReportService();
+                var flowActions = dgv_FlowActionList.DataSource as List<FlowActionModel>;
+
+                if (flowActions != null && flowActions.Any())
+                {
+                    // Call the report generation method
+                    reportService.GenerateReport(flowActions);
+                }
+                else
+                {
+                    MessageBox.Show("No flow action data available for report generation.",
+                        "No Data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error generating report: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        */
+
+        private void btn_ImpactSummary_Click(object sender, EventArgs e)
+        {
             // --- Step 0: Validate replacement fields for reassign rows ---
             foreach (DataGridViewRow row in dgv_ConnectionReferenceList.Rows)
             {
@@ -577,11 +1047,9 @@ namespace SolutionConnectionReferenceReassignment
                     {
                         var replacementRef = row.Cells["ReplacementConnectionReference"].Value?.ToString();
                         var replacementLogical = row.Cells["ReplacementLogicalName"].Value?.ToString();
-                        var connectionType = row.Cells["ConnectionType"].Value?.ToString();
 
                         if (string.IsNullOrWhiteSpace(replacementRef) ||
-                            string.IsNullOrWhiteSpace(replacementLogical) ||
-                            string.IsNullOrWhiteSpace(connectionType))
+                            string.IsNullOrWhiteSpace(replacementLogical))
                         {
                             MessageBox.Show(
                                 "One or more selected connection references are missing required replacement values.\n\n" +
@@ -597,7 +1065,7 @@ namespace SolutionConnectionReferenceReassignment
                 }
             }
 
-            // --- Step 1: Build connection mapping (LogicalName -> ReplacementLogicalName) ---
+            // --- Step 1: Build connection mapping ---
             Dictionary<string, string> connectionMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (DataGridViewRow row in dgv_ConnectionReferenceList.Rows)
@@ -618,7 +1086,7 @@ namespace SolutionConnectionReferenceReassignment
                 }
             }
 
-            // --- Step 2: Gather unique affected flows based on ConnectionReferenceLogicalName ---
+            // --- Step 2: Gather affected flows & actions ---
             HashSet<string> affectedFlows = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             int affectedActionCount = 0;
 
@@ -632,230 +1100,159 @@ namespace SolutionConnectionReferenceReassignment
                 string flowId = flowIdObj.ToString()?.Trim();
                 if (string.IsNullOrWhiteSpace(flowId)) continue;
 
-                // Always prefer ConnectionReferenceLogicalName from the action grid
                 string actionLogical = row.Cells["ConnectionReferenceLogicalName"]?.Value?.ToString()?.Trim();
                 if (string.IsNullOrWhiteSpace(actionLogical)) continue;
 
                 if (connectionMap.ContainsKey(actionLogical))
                 {
-                    affectedFlows.Add(flowId);   // flow counted only once
-                    affectedActionCount++;       // action count still increments per match
+                    affectedFlows.Add(flowId);
+                    affectedActionCount++;
                 }
             }
 
-            // --- Step 3: Confirmation message ---
-            int connectionRefsToReassign = connectionMap.Count;         // number of checked logical names
-            int flowCount = affectedFlows.Count;                        // unique impacted flows
-            string message = $"You are looking to update {connectionRefsToReassign} unique connection reference(s) " +
-                             $"across {flowCount} unique flow(s) (total impacted actions: {affectedActionCount}) - are you sure you wish to proceed?";
+            // --- Step 3: Gather counts ---
+            int connectionRefsToReassign = connectionMap.Count;
+            int flowCount = affectedFlows.Count;
 
-            if (MessageBox.Show(message, "Confirm Update", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
-                return;
-
-            // --- Step 4: Perform the single-flow update for debugging ---
-            // --- Step 4: Perform batch updates across affectedFlows ---
-            WorkAsync(new WorkAsyncInfo
+            // Optional: gather operation metadata IDs like in update routine
+            var operationIdsForWork = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (DataGridViewRow r in dgv_FlowActionList.Rows)
             {
-                Message = "Updating flow connection references...",
-                Work = (worker, args) =>
+                if (r.IsNewRow) continue;
+                var op = r.Cells["OperationMetadataId"]?.Value?.ToString();
+                if (!string.IsNullOrWhiteSpace(op)) operationIdsForWork.Add(op);
+            }
+
+            // --- Present the impact summary ---
+            var sb = new StringBuilder();
+            sb.AppendLine("Impact Summary:");
+            sb.AppendLine($"- Connection References to update: {connectionRefsToReassign}");
+            sb.AppendLine($"- Affected Flows: {flowCount}");
+            sb.AppendLine($"- Impacted Actions: {affectedActionCount}");
+
+            if (operationIdsForWork.Count > 0)
+                sb.AppendLine($"- Specific targeted actions (OperationMetadataId count): {operationIdsForWork.Count}");
+
+            MessageBox.Show(sb.ToString(), "Impact Summary", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void btn_exportcurrentclientdata_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Step 1: Gather the selected logical names to export
+                var selectedLogicalNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (DataGridViewRow row in dgv_ConnectionReferenceList.Rows)
                 {
-                    var perFlowMessages = new List<string>();
+                    if (row.IsNewRow) continue;
+                    if (!(row.Cells["Reassign"] is DataGridViewCheckBoxCell chkCell)) continue;
 
-                    foreach (string flowId in affectedFlows)
+                    bool isChecked = chkCell.Value != null && (bool)chkCell.Value;
+                    if (isChecked)
                     {
-                        int connRefsChanged = 0;
-                        int triggersAuthRemoved = 0;
-                        int actionsAuthRemoved = 0;
-                        int actionsHostUpdated = 0;
-
-                        var flowEntity = Service.Retrieve("workflow", new Guid(flowId), new ColumnSet("clientdata"));
-                        string clientDataJson = flowEntity.GetAttributeValue<string>("clientdata");
-                        if (string.IsNullOrWhiteSpace(clientDataJson))
-                        {
-                            perFlowMessages.Add($"{flowId}: skipped (no clientdata)");
-                            continue;
-                        }
-
-                        JObject clientData = JObject.Parse(clientDataJson);
-
-                        // --- Update connectionReferences (and record which property names we updated) ---
-                        var connectionRefs = clientData["properties"]?["connectionReferences"] as JObject;
-                        var updatedPropNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-                        if (connectionRefs != null)
-                        {
-                            foreach (var prop in connectionRefs.Properties().ToList())
-                            {
-                                // existing logical name
-                                var oldLogical = prop.Value?["connection"]?["connectionReferenceLogicalName"]?.ToString();
-                                if (string.IsNullOrWhiteSpace(oldLogical)) continue;
-
-                                // If we have a mapping from the existing logical name to a replacement, perform change
-                                if (connectionMap.TryGetValue(oldLogical, out var newLogical))
-                                {
-                                    if (!string.Equals(oldLogical, newLogical, StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        // update the logical name in the object
-                                        var connObj = prop.Value["connection"] as JObject;
-                                        if (connObj != null)
-                                        {
-                                            connObj["connectionReferenceLogicalName"] = newLogical;
-                                            updatedPropNames.Add(prop.Name);
-                                            connRefsChanged++;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // If nothing updated, still add a message and continue (or you may prefer to skip saving)
-                        if (connRefsChanged == 0)
-                        {
-                            // still may want to remove auth for actions matching replacement by key -> but if nothing changed then nothing to do
-                        }
-
-                        // --- Triggers: remove authentication only if the trigger is related to changed connection refs ---
-                        var triggers = clientData["properties"]?["definition"]?["triggers"] as JObject;
-                        if (triggers != null)
-                        {
-                            foreach (var triggerProp in triggers.Properties())
-                            {
-                                var triggerInputs = triggerProp.Value?["inputs"] as JObject;
-                                if (triggerInputs == null) continue;
-
-                                var host = triggerInputs["host"] as JObject;
-                                bool triggerIsRelated = false;
-
-                                if (host != null && host["connectionName"] != null)
-                                {
-                                    string hostConnName = host["connectionName"].ToString();
-
-                                    // direct property key match
-                                    if (updatedPropNames.Contains(hostConnName))
-                                        triggerIsRelated = true;
-                                    else if (connectionRefs != null)
-                                    {
-                                        // or hostConnName equals an existing connectionReferenceLogicalName for a prop we updated
-                                        var matching = connectionRefs.Properties()
-                                            .FirstOrDefault(p =>
-                                                string.Equals(p.Value?["connection"]?["connectionReferenceLogicalName"]?.ToString(), hostConnName, StringComparison.OrdinalIgnoreCase)
-                                                && updatedPropNames.Contains(p.Name));
-                                        if (matching != null) triggerIsRelated = true;
-                                    }
-                                }
-
-                                if (triggerIsRelated)
-                                {
-                                    var authProp = triggerInputs.Property("authentication");
-                                    if (authProp != null)
-                                    {
-                                        authProp.Remove();
-                                        triggersAuthRemoved++;
-                                    }
-                                }
-                            }
-                        }
-
-                        // --- Actions: remove authentication only for related actions and set connectionReferenceName if needed ---
-                        var actions = clientData["properties"]?["definition"]?["actions"] as JObject;
-                        if (actions != null)
-                        {
-                            foreach (var actionProp in actions.Properties())
-                            {
-                                var actionObj = actionProp.Value as JObject;
-                                if (actionObj == null) continue;
-
-                                var inputs = actionObj["inputs"] as JObject;
-                                if (inputs == null) continue;
-
-                                var host = inputs["host"] as JObject;
-                                if (host == null) continue;
-
-                                string hostConnName = host["connectionName"]?.ToString();
-                                if (string.IsNullOrEmpty(hostConnName)) continue;
-
-                                bool actionIsRelated = false;
-                                string resolvedHostKey = hostConnName;
-
-                                if (updatedPropNames.Contains(hostConnName))
-                                {
-                                    actionIsRelated = true; // host connectionName is the property key we changed
-                                }
-                                else if (connectionRefs != null)
-                                {
-                                    // maybe hostConnName equals the old logical name; find the corresponding prop that we updated
-                                    var matching = connectionRefs.Properties()
-                                        .FirstOrDefault(p =>
-                                            string.Equals(p.Value?["connection"]?["connectionReferenceLogicalName"]?.ToString(), hostConnName, StringComparison.OrdinalIgnoreCase)
-                                            && updatedPropNames.Contains(p.Name));
-                                    if (matching != null)
-                                    {
-                                        actionIsRelated = true;
-                                        resolvedHostKey = matching.Name; // use prop name for connectionReferenceName
-                                    }
-                                }
-
-                                if (actionIsRelated)
-                                {
-                                    var authProp = inputs.Property("authentication");
-                                    if (authProp != null)
-                                    {
-                                        authProp.Remove();
-                                        actionsAuthRemoved++;
-                                    }
-
-                                    // set or update host.connectionReferenceName to point to the flow-level connectionReferences key
-                                    var existingConnRefNameProp = host.Property("connectionReferenceName");
-                                    if (existingConnRefNameProp == null || existingConnRefNameProp.Value.ToString() != resolvedHostKey)
-                                    {
-                                        host["connectionReferenceName"] = resolvedHostKey;
-                                        actionsHostUpdated++;
-                                    }
-                                }
-                            }
-                        }
-
-                        // --- Save updated flow clientdata ---
-                        flowEntity["clientdata"] = clientData.ToString(Formatting.None);
-                        Service.Update(flowEntity);
-
-                        // --- Add per-flow summary message ---
-                        perFlowMessages.Add($"{flowId}: connRefsChanged={connRefsChanged}, triggersAuthRemoved={triggersAuthRemoved}, actionsAuthRemoved={actionsAuthRemoved}, actionsHostUpdated={actionsHostUpdated}");
-                    }
-
-                    // Return the list of per-flow messages to PostWorkCallBack
-                    args.Result = perFlowMessages;
-                },
-                PostWorkCallBack = (args) =>
-                {
-                    if (args.Error != null)
-                    {
-                        MessageBox.Show("Error: " + args.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-
-                    var results = args.Result as List<string>;
-                    if (results != null && results.Count > 0)
-                    {
-                        var sb = new System.Text.StringBuilder("Update results per flow:\n");
-                        foreach (var line in results) sb.AppendLine(line);
-                        MessageBox.Show(sb.ToString(), "Update Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("No flows updated.", "Update Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        var logicalName = row.Cells["LogicalName"]?.Value?.ToString()?.Trim();
+                        if (!string.IsNullOrWhiteSpace(logicalName))
+                            selectedLogicalNames.Add(logicalName);
                     }
                 }
 
-            });
+                if (selectedLogicalNames.Count == 0)
+                {
+                    MessageBox.Show("No connection references selected for export.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
 
+                // Step 2: Gather affected flows
+                var affectedFlows = new List<Entity>();
+                foreach (DataGridViewRow row in dgv_FlowActionList.Rows)
+                {
+                    if (row.IsNewRow) continue;
+
+                    var flowIdObj = row.Cells["FlowId"]?.Value;
+                    var actionLogical = row.Cells["ConnectionReferenceLogicalName"]?.Value?.ToString()?.Trim();
+                    if (flowIdObj != null && !string.IsNullOrWhiteSpace(actionLogical) && selectedLogicalNames.Contains(actionLogical))
+                    {
+                        var flowId = new Guid(flowIdObj.ToString());
+                        var flowEntity = Service.Retrieve("workflow", flowId, new ColumnSet("clientdata", "name"));
+                        affectedFlows.Add(flowEntity);
+                    }
+                }
+
+                if (affectedFlows.Count == 0)
+                {
+                    MessageBox.Show("No flows found for the selected connection references.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                // Step 3: Ask user where to save
+                using (var sfd = new SaveFileDialog())
+                {
+                    sfd.Filter = "JSON file|*.json";
+                    sfd.Title = "Export Workflow ClientData";
+                    sfd.FileName = "ExportedFlows.json";
+                    sfd.OverwritePrompt = true;
+
+                    if (sfd.ShowDialog() != DialogResult.OK) return;
+
+                    // Step 4: Build export data
+                    var exportData = affectedFlows.ToDictionary(
+                        f => f.GetAttributeValue<string>("name") ?? f.Id.ToString(),
+                        f => f.GetAttributeValue<string>("clientdata")
+                    );
+
+                    // Step 5: Write JSON
+                    File.WriteAllText(sfd.FileName, Newtonsoft.Json.JsonConvert.SerializeObject(exportData, Newtonsoft.Json.Formatting.Indented));
+
+                    MessageBox.Show($"Exported {exportData.Count} workflows successfully to:\n{sfd.FileName}", "Export Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error exporting clientdata: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
+        private void btn_OpenSolution_Click(object sender, EventArgs e)
+        {
+            if (tree_SolutionFlowExplorer.SelectedNode?.Tag is SolutionModel solution)
+            {
+                try
+                {
+                    var query = new QueryExpression("organization")
+                    {
+                        ColumnSet = new ColumnSet("organizationid")
+                    };
 
+                    var result = Service.RetrieveMultiple(query).Entities.FirstOrDefault();
+                    if (result != null)
+                    {
+                        var orgId = result.GetAttributeValue<Guid>("organizationid");
 
-
-
-
-
+                        var environmentId = result.GetAttributeValue<Guid>("organizationid").ToString();
+                        var url = $"https://make.powerapps.com/environments/{orgId}/solutions/{solution.SolutionId}";
+                        
+                        try
+                        {
+                            System.Diagnostics.Process.Start(url); // On .NET Framework
+                                                                   // For .NET Core/.NET 5+, you'd use:
+                                                                   // System.Diagnostics.Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"Failed to open browser: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error getting environment ID: {ex.Message}");
+                    
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please select a solution node first.", "No Solution Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
     }
 }
