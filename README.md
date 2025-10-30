@@ -1,7 +1,6 @@
 ﻿# XRMToolbox Plugin: Flow Connection Reference Reassigner
 
 ![GitHub Release](https://img.shields.io/github/v/release/MatthewTDunn/ConnectionReferenceReassignmentTool?style=flat-square)
-![Licence](https://img.shields.io/github/license/MatthewTDunn/ConnectionReferenceReassignmentTool?style=flat-square)
 
 ## Overview
 
