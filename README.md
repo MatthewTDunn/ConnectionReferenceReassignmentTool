@@ -21,10 +21,10 @@ Use this tool to:
 
 ![Initial Solution Loading Step](/assets/Screenshot1.jpg)
 
-1. Click the solution or environment you'd like to bulk review/reassign connection references for.
-
 
 ![Executing a Flow Connection Reference Update Screenshot](/assets/Screenshot2.jpg)
+
+### UI Reference
 
 1. The replacement connection reference (this is filtered from connection references you own, with the same type).
 2. How many flows will be impacted by the updating of this connection reference.
@@ -38,7 +38,7 @@ Use this tool to:
 ---
 
 ## License
-This project is licensed under the MIT License.
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you’d like to change.
