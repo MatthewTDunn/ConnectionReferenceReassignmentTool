@@ -124,20 +124,8 @@ namespace SolutionConnectionReferenceReassignment
 
         private void ToggleButtons(bool state, object nodeTag)
         {
-            btn_exportcurrentclientdata.Enabled = state;
-            btn_ImpactSummary.Enabled = state;
-            btn_executeflowclientdataupdate.Enabled = state;
-
-            // Only enable the button to open the solution if we're on a solution node.
-            btn_OpenSolution.Enabled = (nodeTag is SolutionModel) ? true : false;
-        }
-
-        // I originally hoped that we could reassign to any available connection references but platform limitations only allow reassignment at the user level. 
-
-
-
-        // NEED TO USE THIS
-        
+            
+        }       
         
 
         private void tsbClose_Click(object sender, EventArgs e)
@@ -197,7 +185,6 @@ namespace SolutionConnectionReferenceReassignment
 
             if (e.Control is ComboBox combo)
             {
-                // color the editing control to match Reassign state
                 var row = dgv_ConnectionReferenceList.CurrentRow;
 
                 // avoid double-subscribe
@@ -259,6 +246,21 @@ namespace SolutionConnectionReferenceReassignment
         {
             System.Diagnostics.Process.Start("https://github.com/MatthewTDunn/ConnectionReferenceReassignmentTool");
         }
+
+        private void tsb_about_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(
+                "Solution Connection Reference Reassignment Tool\n\n" +
+                "Connection References in the Power Platform can be messy and often created automatically as a byproduct of the development process. " +
+                "This tool is designed to help you map these connection references to governed, service principal or managed connection references to assist in platform governance activities. " +
+                "In addition to processes reassigned via this tool, please check Copilot Studio agents & Canvas Apps for connection reference candidates for consolidation. \n\n" +
+                "Once connection references have been consolidated for your organisation, auditing and cleanup activities are recommended.",
+                "About",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
+        }
+
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -789,6 +791,35 @@ namespace SolutionConnectionReferenceReassignment
         /// </summary>
         private bool ValidateGridInputs()
         {
+            // First, check for msdyn_ replacement warning
+            foreach (DataGridViewRow row in dgv_ConnectionReferenceList.Rows)
+            {
+                if (row.IsNewRow) continue;
+
+                var logicalName = row.Cells["LogicalName"]?.Value?.ToString();
+                var replacementRef = row.Cells["ReplacementConnectionReference"]?.Value?.ToString();
+
+                // Check if LogicalName starts with msdyn_ AND has a replacement value
+                if (!string.IsNullOrWhiteSpace(logicalName) &&
+                    logicalName.StartsWith("msdyn_", StringComparison.OrdinalIgnoreCase) &&
+                    !string.IsNullOrWhiteSpace(replacementRef))
+                {
+                    var result = MessageBox.Show(
+                        "WARNING: You are attempting to replace one or more connection references that start with 'msdyn_'. " +
+                        "These are typically system or managed connections.\n\n" +
+                        "Are you sure you want to proceed?",
+                        "System Connection Reference Warning",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Warning);
+
+                    if (result == DialogResult.No)
+                        return false;
+
+                    // Only show warning once, then break
+                    break;
+                }
+            }
+
             foreach (DataGridViewRow row in dgv_ConnectionReferenceList.Rows)
             {
                 if (!row.IsNewRow)
@@ -975,6 +1006,9 @@ namespace SolutionConnectionReferenceReassignment
                 sb.AppendLine($"- Processed Flows: {result.ProcessedFlows}");
                 sb.AppendLine($"- Successful Updates: {result.SuccessfulFlows}");
                 sb.AppendLine($"- Total Connection References Changed: {result.TotalConnectionRefsChanged}");
+
+                // MATT TODO: Might want to include additional detail in the future. Functionality not 100% working atm
+                /*
                 sb.AppendLine($"- Total Actions Updated: {result.TotalActionsUpdated}");
                 sb.AppendLine();
                 sb.AppendLine("Detailed Results:");
@@ -983,8 +1017,14 @@ namespace SolutionConnectionReferenceReassignment
                 {
                     sb.AppendLine(message);
                 }
-                // ------
-                // Ask user if they want to generate a report
+
+                */
+
+
+                // MATT TODO: ADD REPORT FUNCTIONALITY POTENTIALLY
+
+                /*
+
                 var dialogResult = MessageBox.Show(
                     sb.ToString() + "\n\nWould you like to generate a PDF report of the changes?",
                     "Update Complete",
@@ -993,19 +1033,41 @@ namespace SolutionConnectionReferenceReassignment
 
                 if (dialogResult == DialogResult.Yes)
                 {
-                    // GenerateUpdateReport();
+                    try
+                    {
+                        var reportService = new ReportService();
+                        var flowActions = dgv_FlowActionList.DataSource as List<FlowActionModel>;
+
+                        if (flowActions != null && flowActions.Any())
+                        {
+                            reportService.GenerateReport(flowActions);
+                        }
+                        else
+                        {
+                            MessageBox.Show("No flow action data available for report generation.",
+                                "No Data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error generating report: {ex.Message}", "Error",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
+
+                */
 
                 // -------
 
                 MessageBox.Show(sb.ToString(), "Update Complete",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);  
             }
             else
             {
                 MessageBox.Show("No flows updated.", "Update Complete",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+            tree_SolutionFlowExplorer_AfterSelect(null, new TreeViewEventArgs(tree_SolutionFlowExplorer.SelectedNode));
         }
 
         /*
@@ -1035,224 +1097,17 @@ namespace SolutionConnectionReferenceReassignment
         }
         */
 
-        private void btn_ImpactSummary_Click(object sender, EventArgs e)
+        
+        
+
+        private void tsb_Github_Click(object sender, EventArgs e)
         {
-            // --- Step 0: Validate replacement fields for reassign rows ---
-            foreach (DataGridViewRow row in dgv_ConnectionReferenceList.Rows)
-            {
-                if (!row.IsNewRow && row.Cells["Reassign"] is DataGridViewCheckBoxCell chkCell)
-                {
-                    bool isChecked = chkCell.Value != null && (bool)chkCell.Value;
-                    if (isChecked)
-                    {
-                        var replacementRef = row.Cells["ReplacementConnectionReference"].Value?.ToString();
-                        var replacementLogical = row.Cells["ReplacementLogicalName"].Value?.ToString();
-
-                        if (string.IsNullOrWhiteSpace(replacementRef) ||
-                            string.IsNullOrWhiteSpace(replacementLogical))
-                        {
-                            MessageBox.Show(
-                                "One or more selected connection references are missing required replacement values.\n\n" +
-                                "Please ensure that Replacement Connection Reference, Replacement Logical Name, and Connection Type are all populated.\n\n" +
-                                "Occasionally, the comboBox in the 'Replacement Connection Reference' column may not register correctly and may need to be reselected if this error persists.",
-                                "Validation Error",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Error
-                            );
-                            return; // stop execution
-                        }
-                    }
-                }
-            }
-
-            // --- Step 1: Build connection mapping ---
-            Dictionary<string, string> connectionMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (DataGridViewRow row in dgv_ConnectionReferenceList.Rows)
-            {
-                if (row.IsNewRow) continue;
-                if (!(row.Cells["Reassign"] is DataGridViewCheckBoxCell chkCell)) continue;
-
-                bool isChecked = chkCell.Value != null && (bool)chkCell.Value;
-                if (!isChecked) continue;
-
-                var existingLogical = row.Cells["LogicalName"].Value?.ToString()?.Trim();
-                var replacementLogical = row.Cells["ReplacementLogicalName"].Value?.ToString()?.Trim();
-
-                if (!string.IsNullOrWhiteSpace(existingLogical) && !string.IsNullOrWhiteSpace(replacementLogical))
-                {
-                    if (!connectionMap.ContainsKey(existingLogical))
-                        connectionMap[existingLogical] = replacementLogical;
-                }
-            }
-
-            // --- Step 2: Gather affected flows & actions ---
-            HashSet<string> affectedFlows = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            int affectedActionCount = 0;
-
-            foreach (DataGridViewRow row in dgv_FlowActionList.Rows)
-            {
-                if (row.IsNewRow) continue;
-
-                var flowIdObj = row.Cells["FlowId"]?.Value;
-                if (flowIdObj == null) continue;
-
-                string flowId = flowIdObj.ToString()?.Trim();
-                if (string.IsNullOrWhiteSpace(flowId)) continue;
-
-                string actionLogical = row.Cells["ConnectionReferenceLogicalName"]?.Value?.ToString()?.Trim();
-                if (string.IsNullOrWhiteSpace(actionLogical)) continue;
-
-                if (connectionMap.ContainsKey(actionLogical))
-                {
-                    affectedFlows.Add(flowId);
-                    affectedActionCount++;
-                }
-            }
-
-            // --- Step 3: Gather counts ---
-            int connectionRefsToReassign = connectionMap.Count;
-            int flowCount = affectedFlows.Count;
-
-            // Optional: gather operation metadata IDs like in update routine
-            var operationIdsForWork = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (DataGridViewRow r in dgv_FlowActionList.Rows)
-            {
-                if (r.IsNewRow) continue;
-                var op = r.Cells["OperationMetadataId"]?.Value?.ToString();
-                if (!string.IsNullOrWhiteSpace(op)) operationIdsForWork.Add(op);
-            }
-
-            // --- Present the impact summary ---
-            var sb = new StringBuilder();
-            sb.AppendLine("Impact Summary:");
-            sb.AppendLine($"- Connection References to update: {connectionRefsToReassign}");
-            sb.AppendLine($"- Affected Flows: {flowCount}");
-            sb.AppendLine($"- Impacted Actions: {affectedActionCount}");
-
-            if (operationIdsForWork.Count > 0)
-                sb.AppendLine($"- Specific targeted actions (OperationMetadataId count): {operationIdsForWork.Count}");
-
-            MessageBox.Show(sb.ToString(), "Impact Summary", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            System.Diagnostics.Process.Start("https://github.com/MatthewTDunn/ConnectionReferenceReassignmentTool");
         }
 
-        private void btn_exportcurrentclientdata_Click(object sender, EventArgs e)
+        private void toolStripButton1_Click_1(object sender, EventArgs e)
         {
-            try
-            {
-                // Step 1: Gather the selected logical names to export
-                var selectedLogicalNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (DataGridViewRow row in dgv_ConnectionReferenceList.Rows)
-                {
-                    if (row.IsNewRow) continue;
-                    if (!(row.Cells["Reassign"] is DataGridViewCheckBoxCell chkCell)) continue;
 
-                    bool isChecked = chkCell.Value != null && (bool)chkCell.Value;
-                    if (isChecked)
-                    {
-                        var logicalName = row.Cells["LogicalName"]?.Value?.ToString()?.Trim();
-                        if (!string.IsNullOrWhiteSpace(logicalName))
-                            selectedLogicalNames.Add(logicalName);
-                    }
-                }
-
-                if (selectedLogicalNames.Count == 0)
-                {
-                    MessageBox.Show("No connection references selected for export.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                // Step 2: Gather affected flows
-                var affectedFlows = new List<Entity>();
-                foreach (DataGridViewRow row in dgv_FlowActionList.Rows)
-                {
-                    if (row.IsNewRow) continue;
-
-                    var flowIdObj = row.Cells["FlowId"]?.Value;
-                    var actionLogical = row.Cells["ConnectionReferenceLogicalName"]?.Value?.ToString()?.Trim();
-                    if (flowIdObj != null && !string.IsNullOrWhiteSpace(actionLogical) && selectedLogicalNames.Contains(actionLogical))
-                    {
-                        var flowId = new Guid(flowIdObj.ToString());
-                        var flowEntity = Service.Retrieve("workflow", flowId, new ColumnSet("clientdata", "name"));
-                        affectedFlows.Add(flowEntity);
-                    }
-                }
-
-                if (affectedFlows.Count == 0)
-                {
-                    MessageBox.Show("No flows found for the selected connection references.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                // Step 3: Ask user where to save
-                using (var sfd = new SaveFileDialog())
-                {
-                    sfd.Filter = "JSON file|*.json";
-                    sfd.Title = "Export Workflow ClientData";
-                    sfd.FileName = "ExportedFlows.json";
-                    sfd.OverwritePrompt = true;
-
-                    if (sfd.ShowDialog() != DialogResult.OK) return;
-
-                    // Step 4: Build export data
-                    var exportData = affectedFlows.ToDictionary(
-                        f => f.GetAttributeValue<string>("name") ?? f.Id.ToString(),
-                        f => f.GetAttributeValue<string>("clientdata")
-                    );
-
-                    // Step 5: Write JSON
-                    File.WriteAllText(sfd.FileName, Newtonsoft.Json.JsonConvert.SerializeObject(exportData, Newtonsoft.Json.Formatting.Indented));
-
-                    MessageBox.Show($"Exported {exportData.Count} workflows successfully to:\n{sfd.FileName}", "Export Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error exporting clientdata: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void btn_OpenSolution_Click(object sender, EventArgs e)
-        {
-            if (tree_SolutionFlowExplorer.SelectedNode?.Tag is SolutionModel solution)
-            {
-                try
-                {
-                    var query = new QueryExpression("organization")
-                    {
-                        ColumnSet = new ColumnSet("organizationid")
-                    };
-
-                    var result = Service.RetrieveMultiple(query).Entities.FirstOrDefault();
-                    if (result != null)
-                    {
-                        var orgId = result.GetAttributeValue<Guid>("organizationid");
-
-                        var environmentId = result.GetAttributeValue<Guid>("organizationid").ToString();
-                        var url = $"https://make.powerapps.com/environments/{orgId}/solutions/{solution.SolutionId}";
-                        
-                        try
-                        {
-                            System.Diagnostics.Process.Start(url); // On .NET Framework
-                                                                   // For .NET Core/.NET 5+, you'd use:
-                                                                   // System.Diagnostics.Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show($"Failed to open browser: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error getting environment ID: {ex.Message}");
-                    
-                }
-            }
-            else
-            {
-                MessageBox.Show("Please select a solution node first.", "No Solution Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
         }
     }
 }

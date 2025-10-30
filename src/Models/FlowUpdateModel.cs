@@ -16,21 +16,11 @@ namespace SolutionConnectionReferenceReassignment.Models
             public int TotalActionsUpdated { get; set; }
             public List<string> PerFlowMessages { get; set; }
 
-            public FlowUpdateResult()
-            {
-                PerFlowMessages = new List<string>();
-            }
         }
-
-        public class SingleFlowUpdateResult
+        
+        public class FlowUpdateItem
         {
-            public string FlowId { get; set; }
-            public bool Success { get; set; }
-            public string Message { get; set; }
-            public int ConnectionRefsChanged { get; set; }
-            public int TriggersAuthRemoved { get; set; }
-            public int ActionsAuthRemoved { get; set; }
-            public int ActionsHostUpdated { get; set; }
+
         }
 
     }

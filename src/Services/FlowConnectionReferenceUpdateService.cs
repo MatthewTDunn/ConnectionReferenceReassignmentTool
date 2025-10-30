@@ -361,6 +361,7 @@ namespace SolutionConnectionReferenceReassignment.Services
         public int TriggersAuthRemoved { get; set; }
         public int ActionsAuthRemoved { get; set; }
         public int ActionsHostUpdated { get; set; }
+
     }
 
     #endregion

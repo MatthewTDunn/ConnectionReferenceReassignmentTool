@@ -67,7 +67,15 @@ namespace SolutionConnectionReferenceReassignment.Orchestrators
             else if (node.Tag is SolutionModel solution)
             {
                 var flowService = new FlowService(_service);
-                var flows = flowService.GetFlowsInSolution(solution.SolutionId);
+                var flows = new List<FlowModel> { };
+                if (node.Text == "Default Solution" || node.Text == "Common Data Services Default Solution")
+                {
+                    flows = flowService.GetAllFlowsInEnvironment();
+                } else
+                {
+                    flows = flowService.GetFlowsInSolution(solution.SolutionId);
+                }
+                    
                 totalFlowsProcessed = flows.Count;
 
                 foreach (var flow in flows)

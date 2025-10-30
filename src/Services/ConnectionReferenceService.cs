@@ -101,7 +101,7 @@ namespace SolutionConnectionReferenceReassignment.Services
                 var whoAmIRequest = new WhoAmIRequest();
                 var whoAmIResponse = (WhoAmIResponse)_service.Execute(whoAmIRequest);
 
-                // Currently tuple OrganizationId is not utilised, but might be handy later as we can't get it directly from the service
+                
                 return whoAmIResponse.UserId;
 
             }

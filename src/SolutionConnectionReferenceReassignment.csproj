@@ -157,6 +157,12 @@
     <Reference Include="NuGet.Versioning, Version=5.9.3.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>packages\NuGet.Versioning.5.9.3\lib\net472\NuGet.Versioning.dll</HintPath>
     </Reference>
+    <Reference Include="PdfSharp, Version=1.50.5147.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\PDFsharp.1.50.5147\lib\net20\PdfSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="PdfSharp.Charting, Version=1.50.5147.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\PDFsharp.1.50.5147\lib\net20\PdfSharp.Charting.dll</HintPath>
+    </Reference>
     <Reference Include="ScintillaNET, Version=3.6.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\jacobslusser.ScintillaNET.3.6.3\lib\net40\ScintillaNET.dll</HintPath>
     </Reference>
@@ -311,6 +317,7 @@
     <Compile Include="Models\FlowActionModel.cs" />
     <Compile Include="Models\ConnectionReferenceModel.cs" />
     <Compile Include="Models\FlowModel.cs" />
+    <Compile Include="Models\ReportModel.cs" />
     <Compile Include="Models\SolutionModel.cs" />
     <Compile Include="Orchestrators\FlowUiOrchestrator.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -323,7 +330,7 @@
     <Compile Include="Services\FlowConnectionReferenceUpdateService.cs" />
     <Compile Include="Services\FlowService.cs" />
     <Compile Include="Services\SolutionService.cs" />
-    <Compile Include="Services\UpdateReportService.cs" />
+    <Compile Include="Services\ReportService.cs" />
     <Compile Include="ToolCore\SolutionConnectionReferenceReassignment.cs" />
     <Compile Include="Forms\SolutionConnectionReferenceReassignmentControl.cs">
       <SubType>UserControl</SubType>
@@ -342,7 +349,9 @@
     <None Include="packages.config" />
     <None Include="tmp\notes.md" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\Icons\lightning_tool.png" />
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Forms\SolutionConnectionReferenceReassignmentControl.resx">
       <DependentUpon>SolutionConnectionReferenceReassignmentControl.cs</DependentUpon>
@@ -363,6 +372,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons\youtube_tool.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons\go_tool.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons\code_tool.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -118,8 +118,17 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="close_tool" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Icons\close_tool.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="refresh_tool" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons\refresh_tool.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="youtube_tool1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons\youtube_tool.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="go_tool" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons\go_tool.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="lightning_tool" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons\lightning_tool.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="about_tool" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons\about_tool.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -127,10 +136,10 @@
   <data name="youtube_tool" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons\youtube_tool.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="refresh_tool" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Icons\refresh_tool.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="close_tool" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons\close_tool.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="youtube_tool1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Icons\youtube_tool.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="code_tool" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons\code_tool.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

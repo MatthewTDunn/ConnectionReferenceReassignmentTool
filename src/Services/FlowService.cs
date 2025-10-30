@@ -37,31 +37,35 @@ namespace SolutionConnectionReferenceReassignment.Services
                 Criteria = new FilterExpression
                 {
                     Conditions =
-                    {
-                        new ConditionExpression("solutionid", ConditionOperator.Equal, solutionId),
-                        new ConditionExpression("componenttype", ConditionOperator.Equal, 29) // 29 is flow/workflow
-                    }
+            {
+                new ConditionExpression("solutionid", ConditionOperator.Equal, solutionId),
+                new ConditionExpression("componenttype", ConditionOperator.Equal, 29) // 29 is flow/workflow
+            }
                 }
             };
-
             var flowComponentIds = _service.RetrieveMultiple(componentQuery)
                 .Entities
                 .Select(e => e.GetAttributeValue<Guid>("objectid"))
                 .ToList();
-
             var flows = new List<FlowModel>();
-
             foreach (var flowId in flowComponentIds)
             {
-                var flow = _service.Retrieve("workflow", flowId, new ColumnSet("name", "statecode", "statuscode"));
+                var flow = _service.Retrieve("workflow", flowId, new ColumnSet("name", "statecode", "statuscode", "category", "type"));
 
-                flows.Add(new FlowModel
+                // Apply the same filtering as GetAllFlowsInEnvironment
+                var category = flow.GetAttributeValue<OptionSetValue>("category")?.Value;
+                var type = flow.GetAttributeValue<OptionSetValue>("type")?.Value;
+
+                if (category == 5 && type == 1) // Only Power Automate flows with Definition type
                 {
-                    Name = flow.GetAttributeValue<string>("name"),
-                    FlowId = flow.Id,
-                    StateCode = flow.GetAttributeValue<OptionSetValue>("statecode")?.Value ?? -1,
-                    StatusCode = flow.GetAttributeValue<OptionSetValue>("statuscode")?.Value ?? -1
-                });
+                    flows.Add(new FlowModel
+                    {
+                        Name = flow.GetAttributeValue<string>("name"),
+                        FlowId = flow.Id,
+                        StateCode = flow.GetAttributeValue<OptionSetValue>("statecode")?.Value ?? -1,
+                        StatusCode = flow.GetAttributeValue<OptionSetValue>("statuscode")?.Value ?? -1
+                    });
+                }
             }
             return flows;
         }
