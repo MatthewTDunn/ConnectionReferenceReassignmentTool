@@ -1102,7 +1102,7 @@ namespace SolutionConnectionReferenceReassignment
 
         private void tsb_Github_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/MatthewTDunn/ConnectionReferenceReassignmentTool");
+            System.Diagnostics.Process.Start("https://github.com/MatthewTDunn/XRM.FlowConnectionReferenceReassigner.XRMToolbox");
         }
 
         private void toolStripButton1_Click_1(object sender, EventArgs e)

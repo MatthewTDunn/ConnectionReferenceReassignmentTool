@@ -17,7 +17,7 @@ Use this tool to:
 
 - Open XRMToolBox and connect to a Dataverse environment
 - Load this plugin from your local build or via the XRM Toolbox library
-- Click the solution (or environment label if appropriate) you'd like to re
+- Click the solution (or environment label if appropriate) you'd like to reassign
 
 ![Initial Solution Loading Step](/assets/Screenshot1.jpg)
 
@@ -34,11 +34,6 @@ Use this tool to:
 6. The type of connection reference.
 7. Refresh the unmanaged solution/environment list.
 8. **Execute the update of replacement connection references**.
-
-
-
-
----
 
 ---
 
